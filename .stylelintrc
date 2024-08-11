@@ -1,0 +1,17 @@
+{
+  "extends": ["stylelint-config-recommended", "stylelint-config-rational-order"],
+  "plugins": ["stylelint-order", "stylelint-prettier", "stylelint-config-rational-order/plugin"],
+  "rules": {
+    "prettier/prettier": true,
+    "at-rule-no-unknown": null,
+    "selector-pseudo-class-no-unknown": [true, {
+      "ignorePseudoClasses": ["global"]
+    }],
+    "color-no-invalid-hex": true,
+    "no-descending-specificity": null,
+    "plugin/rational-order": [true, {
+      "border-in-box-model": true,
+      "empty-line-between-groups": false
+    }]
+  }
+}

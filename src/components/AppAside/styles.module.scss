@@ -1,0 +1,92 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  padding: 20px 0 0;
+  inline-size: 256px;
+  border-inline-end: 1px solid rgba(162, 173, 191, 0.3);
+}
+
+.nav_list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav_list_item {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-inline-end: 3px solid transparent;
+
+  &.active {
+    color: var(--primary-dark);
+    background-color: rgba(var(--primary-light-rgb), 0.3);
+    border-inline-end-color: var(--primary-dark);
+  }
+
+  &.has_active_child,
+  &:hover {
+    color: var(--primary-dark);
+  }
+}
+
+.nav_list_link {
+  display: flex;
+  flex-grow: 1;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 24px;
+}
+
+.nav_list_icon {
+  fill: currentColor;
+}
+
+.nav_list_icon_placeholder,
+.nav_list_icon {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
+.collapse_button {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border: none;
+  color: var(--text-secondary);
+  background-color: transparent;
+  cursor: pointer;
+  inline-size: 30px;
+  block-size: 30px;
+  margin-inline-end: 10px;
+
+  &:hover {
+    color: var(--primary-dark);
+  }
+}
+
+.collapse_button_icon {
+  display: flex;
+  fill: currentColor;
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+.nav_sublist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--background-grey);
+}
+
+.app_version {
+  padding: 10px 16px;
+  margin-block-start: auto;
+  text-align: end;
+}
