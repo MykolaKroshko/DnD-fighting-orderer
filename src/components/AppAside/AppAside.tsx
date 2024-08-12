@@ -9,23 +9,23 @@ import { LayoutContext } from '@/components/AppLayout/AppLayout';
 import { Input } from '@/components/Input/Input';
 import { Modal } from '@/components/Modal/Modal';
 import { Pages } from '@/routes';
-import { type Game } from '@/types';
+import { type IGame } from '@/types';
 
 const LS_LIST_KEY = 'dnd_fo_games_list';
 
-const getGamesList = (): Game[] => {
+const getGamesList = (): IGame[] => {
   const gamesList = localStorage.getItem(LS_LIST_KEY);
   return gamesList !== null ? JSON.parse(gamesList) : [];
 };
 
-const setGamesList = (games: Game[]): void => {
+const setGamesList = (games: IGame[]): void => {
   localStorage.setItem(LS_LIST_KEY, JSON.stringify(games));
 };
 
 export function AppAside(): React.ReactElement {
   const { setCurrentGame, currentGame } = useContext(GlobalContext);
   const { sidebarOpen, onToggleSidebar, isMobile } = useContext(LayoutContext);
-  const [games, setGames] = React.useState<Game[]>(getGamesList());
+  const [games, setGames] = React.useState<IGame[]>(getGamesList());
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
   const [formInput, setFormInput] = React.useState<string>('');
   const { id } = useParams();
@@ -50,7 +50,7 @@ export function AppAside(): React.ReactElement {
   };
 
   const onConfirmModal = (): void => {
-    const newGame: Game = { id: Math.round(Math.random() * 1_000_000_000), title: formInput };
+    const newGame: IGame = { id: Math.round(Math.random() * 1_000_000_000), title: formInput };
     const newGames = [...games, newGame].toSorted((a, b) => a.title.localeCompare(b.title));
     setCurrentGame(newGame);
     setGames(newGames);
@@ -96,9 +96,9 @@ export function AppAside(): React.ReactElement {
 }
 
 interface IListItemProps {
-  game: Game;
+  game: IGame;
   currentGameId: number | undefined;
-  setCurrentGame: (game: Game) => void;
+  setCurrentGame: (game: IGame) => void;
 }
 
 function ListItem({ game, currentGameId, setCurrentGame }: IListItemProps): React.ReactElement {

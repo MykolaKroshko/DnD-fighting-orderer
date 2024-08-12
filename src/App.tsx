@@ -2,11 +2,11 @@ import './App.scss';
 import { createContext, type ReactElement, useMemo, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from '@/routes';
-import { type Game } from '@/types';
+import { type IGame } from '@/types';
 
 interface IGlobalContext {
-  currentGame: Game | null;
-  setCurrentGame: (game: Game) => void;
+  currentGame: IGame | null;
+  setCurrentGame: (game: IGame) => void;
 }
 
 export const GlobalContext = createContext<IGlobalContext>({
@@ -15,7 +15,7 @@ export const GlobalContext = createContext<IGlobalContext>({
 });
 
 export function App(): ReactElement {
-  const [currentGame, setCurrentGame] = useState<Game | null>(null);
+  const [currentGame, setCurrentGame] = useState<IGame | null>(null);
 
   const ctxValue = useMemo<IGlobalContext>(
     () => ({
