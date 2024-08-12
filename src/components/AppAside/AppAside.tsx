@@ -1,7 +1,7 @@
 import styles from './styles.module.scss';
 import clsx from 'clsx';
-import React, { type FormEvent, useContext, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { type FormEvent, useContext, useEffect, useMemo } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { GlobalContext } from '@/App';
 import SidebarIcon from '@/assets/icons/sidebar.svg?react';
 import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
@@ -28,6 +28,16 @@ export function AppAside(): React.ReactElement {
   const [games, setGames] = React.useState<Game[]>(getGamesList());
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
   const [formInput, setFormInput] = React.useState<string>('');
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (id !== undefined && games.length > 0) {
+      const game = games.find((game) => game.id === Number(id));
+      if (game !== undefined) {
+        setCurrentGame(game);
+      }
+    }
+  }, []);
 
   const icon = useMemo(
     () => (isMobile ? <SidebarIcon className="icon" /> : <SidebarWideIcon className="icon" />),
