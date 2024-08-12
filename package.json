@@ -7,7 +7,7 @@
     "start": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint vite-project",
-    "preview": "vite preview",
+    "preview": "tsc -b && vite build & vite preview",
     "postinstall": "husky .husky"
   },
   "dependencies": {
@@ -50,6 +50,7 @@
     "stylelint-config-recommended": "^14.0.1",
     "stylelint-order": "^6.0.4",
     "stylelint-prettier": "^5.0.2",
+    "terser": "^5.31.5",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.0",
