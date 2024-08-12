@@ -7,23 +7,7 @@
 }
 
 .sidebar_toggle_btn {
-  display: inline-flex;
-  margin: 0;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  background-color: transparent;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #ececec;
-  }
-
   &.hidden {
     display: none;
   }
-}
-
-.sidebar_icon {
-  fill: #7d7d7d;
 }

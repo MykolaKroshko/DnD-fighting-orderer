@@ -11,14 +11,10 @@ export function AppHeader(): React.ReactNode {
   return (
     <header className={styles.container}>
       <button
-        className={clsx(styles.sidebar_toggle_btn, { [styles.hidden]: !isMobile && sidebarOpen })}
+        className={clsx('btn', styles.sidebar_toggle_btn, { [styles.hidden]: !isMobile && sidebarOpen })}
         onClick={onToggleSidebar}
       >
-        {!isMobile && !sidebarOpen ? (
-          <SidebarWideIcon className={styles.sidebar_icon} />
-        ) : (
-          <SidebarIcon className={styles.sidebar_icon} />
-        )}
+        {!isMobile && !sidebarOpen ? <SidebarWideIcon className="icon" /> : <SidebarIcon className="icon" />}
       </button>
     </header>
   );

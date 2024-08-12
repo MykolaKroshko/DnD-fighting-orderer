@@ -4,12 +4,13 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  gap: 1rem;
   padding: 0 0.75rem;
   background-color: #f9f9f9;
+  transition: inset-inline-start 0.2s ease-in-out;
   inline-size: 20rem;
   block-size: 100%;
   inset-inline-start: -20rem;
-  transition: inset-inline-start 0.2s ease-in-out;
 
   &.open {
     inset-inline-start: 0;
@@ -21,7 +22,7 @@
     inline-size: 260px;
 
     &.open {
-      display: block;
+      display: flex;
     }
   }
 }
@@ -29,7 +30,7 @@
 .sidebar_shade {
   position: static;
   display: none;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.2);
   animation: show 0.3s ease-in-out;
   inset-block-start: 0;
   inset-inline-start: 0;
@@ -56,20 +57,41 @@
 }
 
 .sidebar_toggle_btn {
-  display: inline-flex;
-  margin: 0;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  background-color: transparent;
+  margin-block-start: 0.625rem;
+}
+
+.add_btn {
+  padding: 0.5rem 1rem;
+  border-color: rgba(0, 0, 0, 0.1);
+  border-width: 1px;
+  border-radius: 0.25rem;
+  background-color: #ffffff;
+  margin-block-start: auto;
+  margin-block-end: 1rem;
   cursor: pointer;
-  margin-block-start: 10px;
+  transition: background-color 0.2s ease-in-out;
 
   &:hover {
     background-color: #ececec;
   }
 }
 
-.sidebar_icon {
-  fill: #7d7d7d;
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.list_item {
+  display: block;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  color: currentColor;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover,
+  &.active {
+    background-color: #ececec;
+  }
 }

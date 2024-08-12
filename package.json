@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint vite-project",
+    "lint": "eslint . --ext .ts,.tsx",
     "preview": "tsc -b && vite build & vite preview",
     "postinstall": "husky .husky"
   },

@@ -1,5 +1,5 @@
-import { createContext, type ReactElement, useMemo, useState } from 'react';
 import './App.scss';
+import { createContext, type ReactElement, useMemo, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from '@/routes';
 import { type Game } from '@/types';
