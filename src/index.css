@@ -1,4 +1,5 @@
 #root {
+  display: flex;
+  background-color: #ffffff;
   min-block-size: 100vh;
-  background-image: url('assets/background.jpeg');
 }

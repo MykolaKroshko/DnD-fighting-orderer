@@ -1,74 +1,29 @@
-.header {
+.container {
   display: flex;
-  padding: 15px 16px;
-  border-block-end: 1px solid rgba(162, 173, 191, 0.3);
-  padding-inline-end: 25px;
-}
-
-.logo_wrapper {
-  display: flex;
-  gap: 12px;
   align-items: center;
+  justify-content: space-between;
+  block-size: 3.75rem;
+  padding: 0 0.75rem;
 }
 
-.logo {
-  display: flex;
-}
+.sidebar_toggle_btn {
+  display: inline-flex;
+  margin: 0;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  cursor: pointer;
 
-.right_wrapper {
-  display: flex;
-  flex-grow: 1;
-  gap: 16px;
-  align-items: center;
-  justify-content: end;
-}
+  &:hover {
+    background-color: #ececec;
+  }
 
-.divider {
-  inline-size: 1px;
-  block-size: 30px;
-  background-color: var(--grey-main);
-}
-
-.form {
-  inline-size: 100%;
-  max-inline-size: 220px;
-
-  [class*='form_input__error'] {
+  &.hidden {
     display: none;
   }
 }
 
-.notifications {
-  display: flex;
-  inline-size: 24px;
-  block-size: 24px;
-}
-
-.account_name {
-  position: relative;
-}
-
-.tag {
-  padding: 0 10px;
-  border-radius: 4px;
-
-  &.local {
-    background-color: var(--green-main);
-  }
-
-  &.dev {
-    background-color: var(--cyan-dark);
-  }
-
-  &.qa {
-    background-color: var(--yellow-dark);
-  }
-
-  &.uat {
-    background-color: var(--purple-dark);
-  }
-
-  &.prod {
-    background-color: var(--blue-main);
-  }
+.sidebar_icon {
+  fill: #7d7d7d;
 }

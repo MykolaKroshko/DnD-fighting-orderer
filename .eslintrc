@@ -1,142 +1,141 @@
 {
   "parser": "@typescript-eslint/parser",
-    "settings": {
-  "react": {
-    "version": "detect"
-    // Tells eslint-plugin-react to automatically detect the version of React to use
+  "settings": {
+    "react": {
+      "version": "detect"
+      // Tells eslint-plugin-react to automatically detect the version of React to use
+    },
+    "postcss-modules": {
+      "postcssConfigDir": "cwd",
+      "baseDir": "cwd",
+      "camelCase": false,
+      "defaultScope": "local",
+      "include": "**/*.module.scss",
+      "exclude": "**/node_modules/**/*"
+    }
   },
-  "postcss-modules": {
-    "postcssConfigDir": "cwd",
-        "baseDir": "cwd",
-        "camelCase": false,
-        "defaultScope": "local",
-        "include": "**/*.module.scss",
-        "exclude": "**/node_modules/**/*"
-  }
-},
   "extends": [
-  "standard-with-typescript",
-  "plugin:react/recommended",
-  "plugin:react-hooks/recommended",
-  "plugin:@typescript-eslint/recommended",
-  "prettier",
-  "plugin:postcss-modules/recommended"
-],
-    "parserOptions": {
-  "project": "./tsconfig.json",
-      "ecmaVersion": "latest",
-      "sourceType": "module"
-},
+    "standard-with-typescript",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+    "plugin:postcss-modules/recommended"
+  ],
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
   "plugins": [
-  "import",
-  "@typescript-eslint",
-  "@tanstack/eslint-plugin-query",
-  "postcss-modules",
-  "prettier"
-],
-    "ignorePatterns": ["__generated__", "vite*.ts"],
-    "rules": {
-  "postcss-modules/no-undef-class": "warn",
-      "postcss-modules/no-unused-class": "error",
-      "object-curly-spacing": [
-    "warn",
-    "always"
+    "import",
+    "@typescript-eslint",
+    "postcss-modules",
+    "prettier"
   ],
-      "no-trailing-spaces": [
-    "warn"
-  ],
-      "no-console": [
-    "error"
-  ],
-      "quotes": [
-    "warn",
-    "single"
-  ],
-      "jsx-quotes": [
-    "warn",
-    "prefer-double"
-  ],
-      "curly": [
-    "error"
-  ],
-      "max-len": [
-    "warn",
-    {
-      "code": 150,
-      "ignoreUrls": true,
-      "ignoreComments": true
-    }
-  ],
-      "@typescript-eslint/no-var-requires": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
-      "@typescript-eslint/no-namespace": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-argument": "off",
-      "@typescript-eslint/non-nullable-type-assertion-style": "off",
-      "react/react-in-jsx-scope": "off",
-      "react/prop-types": "off",
-      "react-hooks/exhaustive-deps": "warn",
-      "react/display-name": "off",
-      "brace-style": [
-    "warn",
-    "1tbs"
-  ],
-      "import/order": [
-    "warn",
-    {
-      "groups": [
-        "builtin",
-        "external",
-        "parent",
-        "sibling",
-        "index",
-        "unknown"
-      ],
-      "pathGroups": [
-        {
-          "pattern": "./*.scss",
-          "group": "builtin",
-          "position": "before"
-        }
-      ],
-      "alphabetize": {
-        "order": "asc",
-        "caseInsensitive": true
-      },
-      "warnOnUnassignedImports": true
-    }
-  ],
-      "import/newline-after-import": [
-    "warn"
-  ],
-      "prettier/prettier": [
-    "error",
-    {
-      "endOfLine": "auto"
-    }
-  ],
-      "@typescript-eslint/unbound-method": "error",
-      "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/await-thenable": "error",
-      "@typescript-eslint/no-for-in-array": "error",
-      "@typescript-eslint/no-implied-eval": "error",
-      "@typescript-eslint/require-await": "error",
-      "import/no-default-export": "error",
-      "import/no-cycle": "error",
-      "import/no-unused-modules": "error",
-      "import/no-useless-path-segments": "error",
-      "import/no-self-import": "error",
-      "import/no-duplicates": "error",
-      "@typescript-eslint/no-unused-vars": [
-    "error",
-    {
-      "vars": "all",
-      "args": "none",
-      "caughtErrors": "all",
-      "destructuredArrayIgnorePattern": "^_"
-    }
-  ]
-}
+  "ignorePatterns": ["__generated__", "vite*.ts"],
+  "rules": {
+    "postcss-modules/no-undef-class": "warn",
+    "postcss-modules/no-unused-class": "error",
+    "object-curly-spacing": [
+      "warn",
+      "always"
+    ],
+    "no-trailing-spaces": [
+      "warn"
+    ],
+    "no-console": [
+      "error"
+    ],
+    "quotes": [
+      "warn",
+      "single"
+    ],
+    "jsx-quotes": [
+      "warn",
+      "prefer-double"
+    ],
+    "curly": [
+      "error"
+    ],
+    "max-len": [
+      "warn",
+      {
+        "code": 150,
+        "ignoreUrls": true,
+        "ignoreComments": true
+      }
+    ],
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-namespace": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/non-nullable-type-assertion-style": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/display-name": "off",
+    "brace-style": [
+      "warn",
+      "1tbs"
+    ],
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "parent",
+          "sibling",
+          "index",
+          "unknown"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "./*.scss",
+            "group": "builtin",
+            "position": "before"
+          }
+        ],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "warnOnUnassignedImports": true
+      }
+    ],
+    "import/newline-after-import": [
+      "warn"
+    ],
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ],
+    "@typescript-eslint/unbound-method": "error",
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/no-for-in-array": "error",
+    "@typescript-eslint/no-implied-eval": "error",
+    "@typescript-eslint/require-await": "error",
+    "import/no-default-export": "error",
+    "import/no-cycle": "error",
+    "import/no-unused-modules": "error",
+    "import/no-useless-path-segments": "error",
+    "import/no-self-import": "error",
+    "import/no-duplicates": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "none",
+        "caughtErrors": "all",
+        "destructuredArrayIgnorePattern": "^_"
+      }
+    ]
+  }
 }
