@@ -5,7 +5,7 @@ import { AddPlayerModal } from '@/components/AddPlayerModal/AddPlayerModal';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
 import { Modal } from '@/components/Modal/Modal';
 import { PlayerRow } from '@/components/PlayerRow/PlayerRow';
-import { type IGameDetails, type IPlayer, PlayerType } from '@/types';
+import { GameStatus, type IGameDetails, type IPlayer, PlayerType } from '@/types';
 
 interface ISetupStageProps {
   details: IGameDetails;
@@ -84,7 +84,23 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
         >
           Add Enemy
         </button>
-        <button className={clsx('btn', styles.change_status)}>Start Combat</button>
+        <button
+          className={clsx('btn', styles.change_status)}
+          onClick={() => {
+            if (
+              details.players.every((p: IPlayer) => typeof p.initiative === 'number') &&
+              details.allies.every((p: IPlayer) => typeof p.initiative === 'number') &&
+              details.enemies.every((p: IPlayer) => typeof p.initiative === 'number')
+            ) {
+              updateGameDetails({
+                ...details,
+                status: GameStatus.Combat,
+              });
+            }
+          }}
+        >
+          Start Combat
+        </button>
       </div>
       <table>
         <thead>

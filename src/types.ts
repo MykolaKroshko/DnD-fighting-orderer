@@ -18,8 +18,8 @@ export interface IPlayer {
   id: number;
   name: string;
   type: PlayerType;
-  initiative?: number;
-  dex?: number;
+  initiative: number | null;
+  dex: number | null;
 }
 
 export interface IGameDetails {

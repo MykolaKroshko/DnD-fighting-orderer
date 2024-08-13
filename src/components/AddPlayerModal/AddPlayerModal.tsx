@@ -1,4 +1,4 @@
-import React, { type FormEvent, useEffect, useRef } from 'react';
+import React, { type FormEvent, useEffect, useMemo, useRef } from 'react';
 import { Input } from '@/components/Input/Input';
 import { Modal } from '@/components/Modal/Modal';
 import { ModalsStatus } from '@/components/SetupStage/SetupStage';
@@ -13,18 +13,27 @@ interface IAddPlayerModalProps {
 export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPlayerModalProps): React.ReactElement {
   const title =
     status === ModalsStatus.AddPlayer ? 'Add Player' : status === ModalsStatus.AddAlly ? 'Add Ally' : 'Add Enemy';
-  const newName =
-    status === ModalsStatus.AddPlayer ? 'New Player' : status === ModalsStatus.AddAlly ? 'New Ally' : 'New Enemy';
-  const [name, setName] = React.useState<string>(newName);
-  const [dex, setDex] = React.useState<number>();
-  const [initiative, setInitiative] = React.useState<number>();
+  const [name, setName] = React.useState<string>('');
+  const [dex, setDex] = React.useState<number>('' as any);
+  const [initiative, setInitiative] = React.useState<number>('' as any);
   const nameRef = useRef<HTMLInputElement>(null);
 
+  const newName = useMemo(() => {
+    const newName =
+      status === ModalsStatus.AddPlayer ? 'New Player' : status === ModalsStatus.AddAlly ? 'New Ally' : 'New Enemy';
+    setName(newName);
+    return newName;
+  }, [status]);
+
   useEffect(() => {
-    if (nameRef.current !== null) {
+    if (
+      nameRef.current !== null &&
+      [ModalsStatus.AddPlayer, ModalsStatus.AddAlly, ModalsStatus.AddEnemy].includes(status)
+    ) {
       nameRef.current?.focus();
+      nameRef.current?.select();
     }
-  }, [nameRef]);
+  }, [nameRef, status]);
 
   return (
     <Modal
@@ -32,7 +41,7 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
       title={title}
       onCloseModal={() => {
         onCloseModal();
-        setName('');
+        setName(newName);
         setDex('' as any);
         setInitiative('' as any);
       }}
@@ -40,8 +49,8 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
         onConfirmModal({
           id: Math.round(Math.random() * 1_000_000_000),
           name,
-          dex,
-          initiative,
+          dex: dex ?? null,
+          initiative: initiative ?? null,
           type:
             status === ModalsStatus.AddPlayer
               ? PlayerType.Player
@@ -49,7 +58,7 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
                 ? PlayerType.Ally
                 : PlayerType.Enemy,
         });
-        setName('');
+        setName(newName);
         setDex('' as any);
         setInitiative('' as any);
       }}
@@ -68,18 +77,20 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
           name="initiative"
           label="Initiative"
           type="number"
+          inputMode="numeric"
           value={initiative}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            setInitiative(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : undefined);
+            setInitiative(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
           }}
         />
         <Input
           name="dex"
           label="Dexterity"
           type="number"
+          inputMode="numeric"
           value={dex}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            setDex(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : undefined);
+            setDex(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
           }}
         />
       </form>

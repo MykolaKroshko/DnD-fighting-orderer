@@ -21,13 +21,14 @@ export function EditPlayerModal({
   details,
   updateGameDetails,
 }: IAddPlayerModalProps): React.ReactElement {
-  const nameRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (nameRef.current !== null) {
-      nameRef.current?.focus();
+    if (inputRef.current !== null && modalsStatus === ModalsStatus.ChangeInitiative) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
     }
-  }, [nameRef]);
+  }, [inputRef, modalsStatus]);
 
   return (
     <Modal
@@ -59,23 +60,26 @@ export function EditPlayerModal({
     >
       <form>
         <Input
+          inputRef={inputRef}
           name="initiative"
           label="Initiative"
           type="number"
+          inputMode="numeric"
           value={currentPlayer?.initiative ?? ''}
           onInput={(e: FormEvent<HTMLInputElement>) => {
             const value = !isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : undefined;
-            setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, initiative: value });
+            setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, initiative: value ?? null });
           }}
         />
         <Input
           name="dex"
           label="Dexterity"
           type="number"
+          inputMode="numeric"
           value={currentPlayer?.dex ?? ''}
           onInput={(e: FormEvent<HTMLInputElement>) => {
             const value = !isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : undefined;
-            setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, dex: value });
+            setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, dex: value ?? null });
           }}
         />
       </form>
