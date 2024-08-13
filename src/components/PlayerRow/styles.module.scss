@@ -1,0 +1,18 @@
+.player {
+  background-color: #d0f0c0;
+}
+
+.ally {
+  background-color: #f0e68c;
+}
+
+.enemy {
+  background-color: #fbceb1;
+}
+
+.table_actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: end;
+}

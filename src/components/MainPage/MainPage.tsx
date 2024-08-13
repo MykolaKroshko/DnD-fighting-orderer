@@ -1,5 +1,8 @@
-import React, { useContext, useEffect } from 'react';
+import styles from './styles.module.scss';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { GlobalContext } from '@/App';
+import { CombatStage } from '@/components/CombatStage/CombatStage';
+import { SetupStage } from '@/components/SetupStage/SetupStage';
 import { GameStatus, type IGameDetails } from '@/types';
 
 const LS_GAME_DETAIL_KEY = 'dnd_fo_game_details';
@@ -18,9 +21,9 @@ const getLSGameDetail = (currentGameId: number): IGameDetails => {
   return gameDetail !== null ? JSON.parse(gameDetail) : { ...emptyGameDetails, gameId: currentGameId };
 };
 
-// const setLSGameDetail = (details: IGameDetails): void => {
-//   localStorage.setItem(LS_GAME_DETAIL_KEY + '__' + details.gameId, JSON.stringify(details));
-// };
+const setLSGameDetail = (details: IGameDetails): void => {
+  localStorage.setItem(LS_GAME_DETAIL_KEY + '__' + details.gameId, JSON.stringify(details));
+};
 
 export function MainPage(): React.ReactElement {
   const { currentGame } = useContext(GlobalContext);
@@ -29,10 +32,10 @@ export function MainPage(): React.ReactElement {
     gameId: currentGame?.id ?? 0,
   });
 
-  // function updateGameDetails(newDetails: IGameDetails): void {
-  //   setGameDetails(newDetails);
-  //   setLSGameDetail(newDetails);
-  // }
+  function updateGameDetails(newDetails: IGameDetails): void {
+    setGameDetails(newDetails);
+    setLSGameDetail(newDetails);
+  }
 
   useEffect(() => {
     if (currentGame?.id !== undefined) {
@@ -40,11 +43,23 @@ export function MainPage(): React.ReactElement {
     }
   }, [currentGame?.id]);
 
-  return (
+  const content = useMemo(() => {
+    switch (gameDetails.status) {
+      case GameStatus.Setup:
+        return <SetupStage details={gameDetails} updateGameDetails={updateGameDetails} />;
+      case GameStatus.Combat:
+        return <CombatStage details={gameDetails} />;
+      default:
+        return <></>;
+    }
+  }, [gameDetails]);
+
+  return currentGame === null ? (
+    <></>
+  ) : (
     <>
       <h4>Stage: {gameDetails.status}</h4>
-      <p>{JSON.stringify(currentGame)}</p>
-      <p>{JSON.stringify(gameDetails)}</p>
+      <div className={styles.content}>{content}</div>
     </>
   );
 }

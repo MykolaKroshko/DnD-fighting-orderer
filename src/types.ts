@@ -9,15 +9,16 @@ export enum GameStatus {
 }
 
 export enum PlayerType {
-  player = 'player',
-  ally = 'ally',
-  enemy = 'enemy',
+  Player = 'player',
+  Ally = 'ally',
+  Enemy = 'enemy',
 }
 
-interface IPlayer {
+export interface IPlayer {
+  id: number;
   name: string;
   type: PlayerType;
-  initiative: number;
+  initiative?: number;
   dex?: number;
 }
 
