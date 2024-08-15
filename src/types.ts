@@ -21,11 +21,12 @@ export enum PlayerStatus {
 
 export interface IPlayer {
   id: number;
-  name: string;
-  type: PlayerType;
-  initiative: number | null;
   dex: number | null;
+  initiative: number | null;
+  name: string;
+  order: number | undefined;
   status: PlayerStatus;
+  type: PlayerType;
 }
 
 export interface IGameDetails {
@@ -35,4 +36,5 @@ export interface IGameDetails {
   allies: IPlayer[];
   enemies: IPlayer[];
   round: number;
+  currentPlayerId?: number;
 }

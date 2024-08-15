@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { PlayerRow } from '@/components/PlayerRow/PlayerRow';
 import { ModalsStatus } from '@/components/SetupStage/SetupStage';
-import { type IGameDetails, type IPlayer, PlayerStatus, PlayerType } from '@/types';
+import { GameStatus, type IGameDetails, type IPlayer, PlayerStatus, PlayerType } from '@/types';
 
 interface IPlayerProps {
   details: IGameDetails;
@@ -41,6 +41,17 @@ export function PlayersTable({
     });
   }
 
+  const players = useMemo(() => {
+    if (details.status === GameStatus.Setup) {
+      return [...details.players, ...details.allies, ...details.enemies];
+    } else if (details.status === GameStatus.Combat) {
+      return [...details.players, ...details.allies, ...details.enemies].toSorted(
+        (a, b) => (a.order ?? 0) - (b.order ?? 0)
+      );
+    }
+    return [];
+  }, [details]);
+
   return (
     <table>
       <thead>
@@ -52,31 +63,14 @@ export function PlayersTable({
         </tr>
       </thead>
       <tbody>
-        {details.players.map((player) => (
+        {players.map((player) => (
           <PlayerRow
             key={player.id}
             player={player}
             onDelete={onRequestDeletePlayer}
             onEdit={onRequestEditPlayer}
             onTogglePause={onRequestToggleUserPaused}
-          />
-        ))}
-        {details.allies.map((player) => (
-          <PlayerRow
-            key={player.id}
-            player={player}
-            onDelete={onRequestDeletePlayer}
-            onEdit={onRequestEditPlayer}
-            onTogglePause={onRequestToggleUserPaused}
-          />
-        ))}
-        {details.enemies.map((player) => (
-          <PlayerRow
-            key={player.id}
-            player={player}
-            onDelete={onRequestDeletePlayer}
-            onEdit={onRequestEditPlayer}
-            onTogglePause={onRequestToggleUserPaused}
+            isCurrentPlayer={details.currentPlayerId === player.id}
           />
         ))}
       </tbody>

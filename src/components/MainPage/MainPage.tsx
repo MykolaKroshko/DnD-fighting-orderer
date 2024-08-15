@@ -13,7 +13,7 @@ const emptyGameDetails: IGameDetails = {
   players: [],
   allies: [],
   enemies: [],
-  round: 0,
+  round: 1,
 };
 
 const getLSGameDetail = (currentGameId: number): IGameDetails => {
@@ -48,7 +48,7 @@ export function MainPage(): React.ReactElement {
       case GameStatus.Setup:
         return <SetupStage details={gameDetails} updateGameDetails={updateGameDetails} />;
       case GameStatus.Combat:
-        return <CombatStage details={gameDetails} />;
+        return <CombatStage details={gameDetails} updateGameDetails={updateGameDetails} />;
       default:
         return <></>;
     }
@@ -58,7 +58,10 @@ export function MainPage(): React.ReactElement {
     <h4 style={{ textAlign: 'center' }}>Please create new game or select existing one to see its details</h4>
   ) : (
     <>
-      <h4>Stage: {gameDetails.status}</h4>
+      <h4>
+        Stage: {gameDetails.status}
+        {gameDetails.status === GameStatus.Combat ? ', Round: ' + gameDetails.round : ''}
+      </h4>
       <div className={styles.content}>{content}</div>
     </>
   );

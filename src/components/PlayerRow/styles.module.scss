@@ -25,6 +25,19 @@
   }
 }
 
+.current td {
+  border-block-start: 3px solid darkorchid;
+  border-block-end: 3px solid darkorchid;
+
+  &:first-child {
+    border-inline-start: 3px solid darkorchid;
+  }
+
+  &:last-child {
+    border-inline-end: 3px solid darkorchid;
+  }
+}
+
 .table_actions {
   display: flex;
   gap: 1rem;

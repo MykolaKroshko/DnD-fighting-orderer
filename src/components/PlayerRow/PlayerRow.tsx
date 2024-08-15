@@ -11,9 +11,16 @@ interface IPlayerProps {
   onDelete: (player: IPlayer) => void;
   onTogglePause: (player: IPlayer) => void;
   onEdit: (player: IPlayer) => void;
+  isCurrentPlayer?: boolean;
 }
 
-export function PlayerRow({ player, onDelete, onTogglePause, onEdit }: IPlayerProps): React.ReactElement {
+export function PlayerRow({
+  player,
+  onDelete,
+  onTogglePause,
+  onEdit,
+  isCurrentPlayer,
+}: IPlayerProps): React.ReactElement {
   return (
     <tr
       className={clsx({
@@ -21,6 +28,7 @@ export function PlayerRow({ player, onDelete, onTogglePause, onEdit }: IPlayerPr
         [styles.ally]: player.type === PlayerType.Ally,
         [styles.enemy]: player.type === PlayerType.Enemy,
         [styles.paused]: player.status === PlayerStatus.Paused,
+        [styles.current]: isCurrentPlayer,
       })}
     >
       <td
@@ -32,25 +40,27 @@ export function PlayerRow({ player, onDelete, onTogglePause, onEdit }: IPlayerPr
       </td>
       <td>{player.initiative ?? '--'}</td>
       <td>{player.dex ?? '--'}</td>
-      <td className={styles.table_actions}>
-        <button
-          className="btn"
-          onClick={(e) => {
-            onTogglePause(player);
-            e.stopPropagation();
-          }}
-        >
-          {player.status === PlayerStatus.Paused ? <FightIcon className="icon" /> : <PauseIcon className="icon" />}
-        </button>
-        <button
-          className="btn"
-          onClick={(e) => {
-            onDelete(player);
-            e.stopPropagation();
-          }}
-        >
-          <DeleteIcon className="icon" />
-        </button>
+      <td>
+        <div className={styles.table_actions}>
+          <button
+            className="btn"
+            onClick={(e) => {
+              onTogglePause(player);
+              e.stopPropagation();
+            }}
+          >
+            {player.status === PlayerStatus.Paused ? <FightIcon className="icon" /> : <PauseIcon className="icon" />}
+          </button>
+          <button
+            className="btn"
+            onClick={(e) => {
+              onDelete(player);
+              e.stopPropagation();
+            }}
+          >
+            <DeleteIcon className="icon" />
+          </button>
+        </div>
       </td>
     </tr>
   );

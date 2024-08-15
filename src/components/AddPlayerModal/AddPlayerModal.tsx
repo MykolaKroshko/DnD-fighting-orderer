@@ -52,6 +52,7 @@ export function AddPlayerModal({
             ? PlayerType.Ally
             : PlayerType.Enemy,
       status: PlayerStatus.Active,
+      order: undefined,
     });
     setName(newName);
     setDex('' as any);
