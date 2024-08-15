@@ -4,8 +4,8 @@ import React from 'react';
 import { AddPlayerModal } from '@/components/AddPlayerModal/AddPlayerModal';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
 import { Modal } from '@/components/Modal/Modal';
-import { PlayerRow } from '@/components/PlayerRow/PlayerRow';
-import { GameStatus, type IGameDetails, type IPlayer, PlayerType } from '@/types';
+import { PlayersTable } from '@/components/PlayersTable/PlayersTable';
+import { GameStatus, type IGameDetails, type IPlayer, PlayerStatus, PlayerType } from '@/types';
 
 interface ISetupStageProps {
   details: IGameDetails;
@@ -47,14 +47,19 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
     });
   }
 
-  function onRequestDeletePlayer(player: IPlayer): void {
-    setCurrentPlayer(player);
-    setModalsStatus(ModalsStatus.DeletePlayer);
-  }
-
-  function onRequestEditPlayer(player: IPlayer): void {
-    setCurrentPlayer(player);
-    setModalsStatus(ModalsStatus.ChangeInitiative);
+  function onChangeGameMode(): void {
+    if (
+      details.players.every((p: IPlayer) => p.status === PlayerStatus.Paused || typeof p.initiative === 'number') &&
+      details.allies.every((p: IPlayer) => p.status === PlayerStatus.Paused || typeof p.initiative === 'number') &&
+      details.enemies.every((p: IPlayer) => p.status === PlayerStatus.Paused || typeof p.initiative === 'number')
+    ) {
+      updateGameDetails({
+        ...details,
+        status: GameStatus.Combat,
+      });
+    } else {
+      alert('All players must have an initiative value or be paused to start a combat.');
+    }
   }
 
   return (
@@ -84,45 +89,16 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
         >
           Add Enemy
         </button>
-        <button
-          className={clsx('btn', styles.change_status)}
-          onClick={() => {
-            if (
-              details.players.every((p: IPlayer) => typeof p.initiative === 'number') &&
-              details.allies.every((p: IPlayer) => typeof p.initiative === 'number') &&
-              details.enemies.every((p: IPlayer) => typeof p.initiative === 'number')
-            ) {
-              updateGameDetails({
-                ...details,
-                status: GameStatus.Combat,
-              });
-            }
-          }}
-        >
+        <button className={clsx('btn', styles.change_status)} onClick={onChangeGameMode}>
           Start Combat
         </button>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Initiative</th>
-            <th>Dex</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {details.players.map((player) => (
-            <PlayerRow key={player.id} player={player} onDelete={onRequestDeletePlayer} onEdit={onRequestEditPlayer} />
-          ))}
-          {details.allies.map((player) => (
-            <PlayerRow key={player.id} player={player} onDelete={onRequestDeletePlayer} onEdit={onRequestEditPlayer} />
-          ))}
-          {details.enemies.map((player) => (
-            <PlayerRow key={player.id} player={player} onDelete={onRequestDeletePlayer} onEdit={onRequestEditPlayer} />
-          ))}
-        </tbody>
-      </table>
+      <PlayersTable
+        details={details}
+        setCurrentPlayer={setCurrentPlayer}
+        setModalsStatus={setModalsStatus}
+        updateGameDetails={updateGameDetails}
+      />
       <AddPlayerModal status={modalsStatus} onCloseModal={onCloseModal} onConfirmModal={onConfirmModal} />
       <Modal
         isOpen={modalsStatus === ModalsStatus.DeletePlayer}

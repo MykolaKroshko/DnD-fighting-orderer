@@ -49,7 +49,7 @@ export function AppLayout(): React.ReactNode {
     } else if (!isMobile && sidebarOpen === SidebarStatus.close) {
       setSidebarOpen(SidebarStatus.open);
     }
-  }, [isMobile]);
+  }, [isMobile, sidebarOpen]);
 
   const onToggleSidebar = useCallback((): void => {
     if (isMobile) {

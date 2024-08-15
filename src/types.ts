@@ -14,12 +14,18 @@ export enum PlayerType {
   Enemy = 'enemy',
 }
 
+export enum PlayerStatus {
+  Active = 'active',
+  Paused = 'paused',
+}
+
 export interface IPlayer {
   id: number;
   name: string;
   type: PlayerType;
   initiative: number | null;
   dex: number | null;
+  status: PlayerStatus;
 }
 
 export interface IGameDetails {

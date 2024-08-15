@@ -55,7 +55,7 @@ export function MainPage(): React.ReactElement {
   }, [gameDetails]);
 
   return currentGame === null ? (
-    <></>
+    <h4 style={{ textAlign: 'center' }}>Please create new game or select existing one to see its details</h4>
   ) : (
     <>
       <h4>Stage: {gameDetails.status}</h4>

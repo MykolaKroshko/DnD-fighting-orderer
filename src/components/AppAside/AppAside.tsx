@@ -37,6 +37,7 @@ export function AppAside(): React.ReactElement {
         setCurrentGame(game);
       }
     }
+    // ignore dependency warning
   }, []);
 
   const icon = useMemo(

@@ -2,7 +2,7 @@ import React, { type FormEvent, useEffect, useMemo, useRef } from 'react';
 import { Input } from '@/components/Input/Input';
 import { Modal } from '@/components/Modal/Modal';
 import { ModalsStatus } from '@/components/SetupStage/SetupStage';
-import { type IPlayer, PlayerType } from '@/types';
+import { type IPlayer, PlayerStatus, PlayerType } from '@/types';
 
 interface IAddPlayerModalProps {
   status: ModalsStatus;
@@ -10,7 +10,11 @@ interface IAddPlayerModalProps {
   onConfirmModal: (data: IPlayer) => void;
 }
 
-export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPlayerModalProps): React.ReactElement {
+export function AddPlayerModal({
+  status,
+  onCloseModal,
+  onConfirmModal: onConfirmModalAction,
+}: IAddPlayerModalProps): React.ReactElement {
   const title =
     status === ModalsStatus.AddPlayer ? 'Add Player' : status === ModalsStatus.AddAlly ? 'Add Ally' : 'Add Enemy';
   const [name, setName] = React.useState<string>('');
@@ -35,6 +39,25 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
     }
   }, [nameRef, status]);
 
+  const onConfirmModal = (): void => {
+    onConfirmModalAction({
+      id: Math.round(Math.random() * 1_000_000_000),
+      name,
+      dex: dex ?? null,
+      initiative: initiative ?? null,
+      type:
+        status === ModalsStatus.AddPlayer
+          ? PlayerType.Player
+          : status === ModalsStatus.AddAlly
+            ? PlayerType.Ally
+            : PlayerType.Enemy,
+      status: PlayerStatus.Active,
+    });
+    setName(newName);
+    setDex('' as any);
+    setInitiative('' as any);
+  };
+
   return (
     <Modal
       isOpen={[ModalsStatus.AddPlayer, ModalsStatus.AddAlly, ModalsStatus.AddEnemy].includes(status)}
@@ -45,23 +68,7 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
         setDex('' as any);
         setInitiative('' as any);
       }}
-      onConfirmModal={() => {
-        onConfirmModal({
-          id: Math.round(Math.random() * 1_000_000_000),
-          name,
-          dex: dex ?? null,
-          initiative: initiative ?? null,
-          type:
-            status === ModalsStatus.AddPlayer
-              ? PlayerType.Player
-              : status === ModalsStatus.AddAlly
-                ? PlayerType.Ally
-                : PlayerType.Enemy,
-        });
-        setName(newName);
-        setDex('' as any);
-        setInitiative('' as any);
-      }}
+      onConfirmModal={onConfirmModal}
     >
       <form>
         <Input
@@ -71,6 +78,11 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
           value={name}
           onInput={(e: FormEvent<HTMLInputElement>) => {
             setName(e.currentTarget.value);
+          }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              onConfirmModal();
+            }
           }}
         />
         <Input
@@ -82,6 +94,11 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
           onInput={(e: FormEvent<HTMLInputElement>) => {
             setInitiative(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
           }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              onConfirmModal();
+            }
+          }}
         />
         <Input
           name="dex"
@@ -91,6 +108,11 @@ export function AddPlayerModal({ status, onCloseModal, onConfirmModal }: IAddPla
           value={dex}
           onInput={(e: FormEvent<HTMLInputElement>) => {
             setDex(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
+          }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              onConfirmModal();
+            }
           }}
         />
       </form>

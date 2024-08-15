@@ -1,13 +1,28 @@
 .player {
   background-color: #d0f0c0;
+
+  &.paused {
+    color: #7d7d7d;
+    background-color: rgba(#d0f0c0, 0.4);
+  }
 }
 
 .ally {
   background-color: #f0e68c;
+
+  &.paused {
+    color: #7d7d7d;
+    background-color: rgba(#f0e68c, 0.4);
+  }
 }
 
 .enemy {
   background-color: #fbceb1;
+
+  &.paused {
+    color: #7d7d7d;
+    background-color: rgba(#fbceb1, 0.4);
+  }
 }
 
 .table_actions {

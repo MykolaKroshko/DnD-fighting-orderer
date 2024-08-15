@@ -30,6 +30,24 @@ export function EditPlayerModal({
     }
   }, [inputRef, modalsStatus]);
 
+  const onConfirmModal = (): void => {
+    if (currentPlayer !== null) {
+      const typeKey =
+        currentPlayer.type === PlayerType.Player
+          ? 'players'
+          : currentPlayer.type === PlayerType.Ally
+            ? 'allies'
+            : 'enemies';
+
+      updateGameDetails({
+        ...details,
+        [typeKey]: details[typeKey].map((player) => (player.id === currentPlayer.id ? { ...currentPlayer } : player)),
+      });
+      setModalsStatus(ModalsStatus.None);
+      setCurrentPlayer(null);
+    }
+  };
+
   return (
     <Modal
       isOpen={modalsStatus === ModalsStatus.ChangeInitiative}
@@ -38,25 +56,7 @@ export function EditPlayerModal({
         setCurrentPlayer(null);
       }}
       title={`Change ${currentPlayer?.name}'s details`}
-      onConfirmModal={() => {
-        if (currentPlayer !== null) {
-          const typeKey =
-            currentPlayer.type === PlayerType.Player
-              ? 'players'
-              : currentPlayer.type === PlayerType.Ally
-                ? 'allies'
-                : 'enemies';
-
-          updateGameDetails({
-            ...details,
-            [typeKey]: details[typeKey].map((player) =>
-              player.id === currentPlayer.id ? { ...currentPlayer } : player
-            ),
-          });
-          setModalsStatus(ModalsStatus.None);
-          setCurrentPlayer(null);
-        }
-      }}
+      onConfirmModal={onConfirmModal}
     >
       <form>
         <Input
@@ -67,8 +67,13 @@ export function EditPlayerModal({
           inputMode="numeric"
           value={currentPlayer?.initiative ?? ''}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            const value = !isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : undefined;
-            setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, initiative: value ?? null });
+            const value = isNaN(parseInt(e.currentTarget.value)) ? null : parseInt(e.currentTarget.value);
+            setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, initiative: value });
+          }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              onConfirmModal();
+            }
           }}
         />
         <Input
@@ -80,6 +85,11 @@ export function EditPlayerModal({
           onInput={(e: FormEvent<HTMLInputElement>) => {
             const value = !isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : undefined;
             setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, dex: value ?? null });
+          }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              onConfirmModal();
+            }
           }}
         />
       </form>
