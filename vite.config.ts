@@ -28,10 +28,10 @@ export default defineConfig(() => ({
       'top-level-await': true,
     },
   },
+  base: '/',
   build: {
     outDir: './build',
     chunkSizeWarningLimit: 1800,
-    base: '/',
     minify: 'terser',
     manifest: true,
     sourcemap: false,
