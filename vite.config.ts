@@ -28,7 +28,7 @@ export default defineConfig(() => ({
       'top-level-await': true,
     },
   },
-  base: '/',
+  base: '/DnD-fighting-orderer/',
   build: {
     outDir: './build',
     chunkSizeWarningLimit: 1800,
