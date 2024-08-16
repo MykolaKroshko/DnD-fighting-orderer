@@ -1,0 +1,33 @@
+{
+  "dnd.ico": {
+    "file": "assets/dnd-B3GQucvu.ico",
+    "src": "dnd.ico"
+  },
+  "index-legacy.html": {
+    "file": "assets/index-legacy-BGTYvt8a.js",
+    "name": "index",
+    "src": "index-legacy.html",
+    "isEntry": true,
+    "assets": [
+      "assets/dnd-B3GQucvu.ico"
+    ]
+  },
+  "index.html": {
+    "file": "assets/index-JGeMQl62.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "css": [
+      "assets/index-CG_1x5wy.css"
+    ],
+    "assets": [
+      "assets/dnd-B3GQucvu.ico"
+    ]
+  },
+  "vite/legacy-polyfills-legacy": {
+    "file": "assets/polyfills-legacy-CMDb7L7j.js",
+    "name": "polyfills",
+    "src": "vite/legacy-polyfills-legacy",
+    "isEntry": true
+  }
+}
