@@ -1,20 +1,20 @@
 import React, { useMemo } from 'react';
 import { PlayerRow } from '@/components/PlayerRow/PlayerRow';
 import { ModalsStatus } from '@/components/SetupStage/SetupStage';
-import { GameStatus, type IGameDetails, type IPlayer, PlayerStatus, PlayerType } from '@/types';
+import { GameStatus, type IGameDetails, type IPlayer } from '@/types';
 
 interface IPlayerProps {
   details: IGameDetails;
   setCurrentPlayer: (p: IPlayer | null) => void;
   setModalsStatus: (s: ModalsStatus) => void;
-  updateGameDetails: (newDetails: IGameDetails) => void;
+  onRequestToggleUserPaused: (player: IPlayer) => void;
 }
 
 export function PlayersTable({
   details,
   setCurrentPlayer,
   setModalsStatus,
-  updateGameDetails,
+  onRequestToggleUserPaused,
 }: IPlayerProps): React.ReactElement {
   function onRequestDeletePlayer(player: IPlayer): void {
     setCurrentPlayer(player);
@@ -24,21 +24,6 @@ export function PlayersTable({
   function onRequestEditPlayer(player: IPlayer): void {
     setCurrentPlayer(player);
     setModalsStatus(ModalsStatus.ChangeInitiative);
-  }
-
-  function onRequestToggleUserPaused(player: IPlayer): void {
-    const typeKey =
-      player.type === PlayerType.Player ? 'players' : player.type === PlayerType.Ally ? 'allies' : 'enemies';
-    updateGameDetails({
-      ...details,
-      [typeKey]: [
-        ...details[typeKey].map((p) =>
-          p.id === player.id
-            ? { ...p, status: p.status === PlayerStatus.Active ? PlayerStatus.Paused : PlayerStatus.Active }
-            : p
-        ),
-      ],
-    });
   }
 
   const players = useMemo(() => {
@@ -59,6 +44,7 @@ export function PlayersTable({
           <th>Name</th>
           <th>Initiative</th>
           <th>Dex</th>
+          <th>Order</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -71,6 +57,7 @@ export function PlayersTable({
             onEdit={onRequestEditPlayer}
             onTogglePause={onRequestToggleUserPaused}
             isCurrentPlayer={details.currentPlayerId === player.id}
+            isCombatStage={details.status === GameStatus.Combat}
           />
         ))}
       </tbody>

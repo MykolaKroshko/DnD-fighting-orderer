@@ -5,7 +5,8 @@ import { AddPlayerModal } from '@/components/AddPlayerModal/AddPlayerModal';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
 import { Modal } from '@/components/Modal/Modal';
 import { PlayersTable } from '@/components/PlayersTable/PlayersTable';
-import { GameStatus, type IGameDetails, type IPlayer, PlayerStatus, PlayerType } from '@/types';
+import { type IGameDetails, type IPlayer, PlayerStatus, type PlayerType } from '@/types';
+import { getDetailsKeyByPlayerType, updatePlayersOrder } from '@/utils';
 
 interface ISetupStageProps {
   details: IGameDetails;
@@ -27,10 +28,11 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
 
   function onCloseModal(): void {
     setModalsStatus(ModalsStatus.None);
+    setCurrentPlayer(null);
   }
 
   function onConfirmModal(data: IPlayer): void {
-    const type = data.type === PlayerType.Player ? 'players' : data.type === PlayerType.Ally ? 'allies' : 'enemies';
+    const type = getDetailsKeyByPlayerType(data.type);
     onCloseModal();
     updateGameDetails({
       ...details,
@@ -39,7 +41,7 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
   }
 
   function onDeletePlayer(id: number, type: PlayerType): void {
-    const typeKey = type === PlayerType.Player ? 'players' : type === PlayerType.Ally ? 'allies' : 'enemies';
+    const typeKey = getDetailsKeyByPlayerType(type);
     const players = details[typeKey].filter((player) => player.id !== id);
     updateGameDetails({
       ...details,
@@ -53,52 +55,34 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
       details.allies.every((p: IPlayer) => p.status === PlayerStatus.Paused || typeof p.initiative === 'number') &&
       details.enemies.every((p: IPlayer) => p.status === PlayerStatus.Paused || typeof p.initiative === 'number')
     ) {
-      const allPlayers = [...details.players, ...details.allies, ...details.enemies]
-        .toSorted((a, b) => {
-          if (a.status === PlayerStatus.Paused && b.status === PlayerStatus.Paused && a.type === b.type) {
-            return a.name.localeCompare(b.name);
-          }
-
-          if (a.status === PlayerStatus.Paused) {
-            return 1;
-          }
-          if (b.status === PlayerStatus.Paused) {
-            return -1;
-          }
-
-          if (a.initiative !== b.initiative) {
-            return (b.initiative ?? 0) - (a.initiative ?? 0);
-          }
-
-          if (a.initiative === b.initiative) {
-            if (a.type === PlayerType.Player && b.type !== PlayerType.Player) {
-              return -1;
-            }
-
-            if (b.type === PlayerType.Player && a.type !== PlayerType.Player) {
-              return 1;
-            }
-
-            if (typeof a.dex === 'number' && typeof b.dex === 'number') {
-              return b.dex - a.dex;
-            }
-          }
-
-          return 0;
-        })
-        .map((p, i) => ({ ...p, order: i + 1 }));
-
-      updateGameDetails({
-        ...details,
-        status: GameStatus.Combat,
-        players: allPlayers.filter((p) => p.type === PlayerType.Player),
-        allies: allPlayers.filter((p) => p.type === PlayerType.Ally),
-        enemies: allPlayers.filter((p) => p.type === PlayerType.Enemy),
-        currentPlayerId: allPlayers[0].id,
-      });
+      updateGameDetails(updatePlayersOrder(details));
     } else {
       alert('All players must have an initiative value or be paused to start a combat.');
     }
+  }
+
+  function onRequestToggleUserPaused(player: IPlayer): void {
+    const typeKey = getDetailsKeyByPlayerType(player.type);
+    updateGameDetails({
+      ...details,
+      [typeKey]: [
+        ...details[typeKey].map((p) =>
+          p.id === player.id
+            ? { ...p, status: p.status === PlayerStatus.Active ? PlayerStatus.Paused : PlayerStatus.Active }
+            : p
+        ),
+      ],
+    });
+  }
+
+  function onConfirmEditPlayerModal(player: IPlayer): void {
+    const typeKey = getDetailsKeyByPlayerType(player.type);
+
+    updateGameDetails({
+      ...details,
+      [typeKey]: details[typeKey].map((p) => (p.id === player.id ? { ...player } : p)),
+    });
+    onCloseModal();
   }
 
   return (
@@ -136,33 +120,29 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
         details={details}
         setCurrentPlayer={setCurrentPlayer}
         setModalsStatus={setModalsStatus}
-        updateGameDetails={updateGameDetails}
+        onRequestToggleUserPaused={onRequestToggleUserPaused}
       />
       <AddPlayerModal status={modalsStatus} onCloseModal={onCloseModal} onConfirmModal={onConfirmModal} />
       <Modal
         isOpen={modalsStatus === ModalsStatus.DeletePlayer}
-        onCloseModal={() => {
-          setModalsStatus(ModalsStatus.None);
-          setCurrentPlayer(null);
-        }}
+        onCloseModal={onCloseModal}
         onConfirmModal={() => {
           if (currentPlayer !== null) {
             onDeletePlayer(currentPlayer.id, currentPlayer.type);
-            setModalsStatus(ModalsStatus.None);
-            setCurrentPlayer(null);
+            onCloseModal();
           }
         }}
       >
         <p>Are you sure you want to delete {currentPlayer?.name}?</p>
       </Modal>
-      <EditPlayerModal
-        currentPlayer={currentPlayer}
-        setCurrentPlayer={setCurrentPlayer}
-        details={details}
-        modalsStatus={modalsStatus}
-        setModalsStatus={setModalsStatus}
-        updateGameDetails={updateGameDetails}
-      />
+      {currentPlayer !== null && (
+        <EditPlayerModal
+          currentPlayer={currentPlayer}
+          isOpen={modalsStatus === ModalsStatus.ChangeInitiative}
+          onClose={onCloseModal}
+          onConfirm={onConfirmEditPlayerModal}
+        />
+      )}
     </>
   );
 }

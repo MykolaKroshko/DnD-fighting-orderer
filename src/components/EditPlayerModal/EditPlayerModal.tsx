@@ -1,59 +1,59 @@
 import React, { type FormEvent, useEffect, useRef } from 'react';
 import { Input } from '@/components/Input/Input';
 import { Modal } from '@/components/Modal/Modal';
-import { ModalsStatus } from '@/components/SetupStage/SetupStage';
-import { type IGameDetails, type IPlayer, PlayerType } from '@/types';
+import { type IPlayer } from '@/types';
 
 interface IAddPlayerModalProps {
-  currentPlayer: IPlayer | null;
-  modalsStatus: ModalsStatus;
-  setModalsStatus: (s: ModalsStatus) => void;
-  setCurrentPlayer: (p: IPlayer | null) => void;
-  details: IGameDetails;
-  updateGameDetails: (newDetails: IGameDetails) => void;
+  currentPlayer: IPlayer;
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (newPlayer: IPlayer) => void;
 }
 
 export function EditPlayerModal({
   currentPlayer,
-  modalsStatus,
-  setModalsStatus,
-  setCurrentPlayer,
-  details,
-  updateGameDetails,
+  isOpen,
+  onClose,
+  onConfirm,
 }: IAddPlayerModalProps): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [pDex, setPDex] = React.useState<number>(currentPlayer?.dex ?? ('' as any));
+  const [pInitiative, setPInitiative] = React.useState<number>(currentPlayer?.initiative ?? ('' as any));
 
   useEffect(() => {
-    if (inputRef.current !== null && modalsStatus === ModalsStatus.ChangeInitiative) {
+    if (isOpen) {
+      setPInitiative(currentPlayer?.initiative ?? ('' as any));
+      setPDex(currentPlayer?.dex ?? ('' as any));
+    }
+  }, [isOpen, currentPlayer]);
+
+  useEffect(() => {
+    if (inputRef.current !== null && isOpen) {
       inputRef.current?.focus();
       inputRef.current?.select();
     }
-  }, [inputRef, modalsStatus]);
+  }, [inputRef, isOpen]);
+
+  const clearInputs = (): void => {
+    setPDex('' as any);
+    setPInitiative('' as any);
+  };
 
   const onConfirmModal = (): void => {
-    if (currentPlayer !== null) {
-      const typeKey =
-        currentPlayer.type === PlayerType.Player
-          ? 'players'
-          : currentPlayer.type === PlayerType.Ally
-            ? 'allies'
-            : 'enemies';
-
-      updateGameDetails({
-        ...details,
-        [typeKey]: details[typeKey].map((player) => (player.id === currentPlayer.id ? { ...currentPlayer } : player)),
-      });
-      setModalsStatus(ModalsStatus.None);
-      setCurrentPlayer(null);
-    }
+    onConfirm({
+      ...currentPlayer,
+      initiative: pInitiative ?? null,
+      dex: pDex ?? null,
+    });
+    clearInputs();
   };
 
   return (
     <Modal
-      isOpen={modalsStatus === ModalsStatus.ChangeInitiative}
+      isOpen={isOpen}
       onCloseModal={() => {
-        setModalsStatus(ModalsStatus.None);
-        setCurrentPlayer(null);
+        onClose();
+        clearInputs();
       }}
       title={`Change ${currentPlayer?.name}'s details`}
       onConfirmModal={onConfirmModal}
@@ -65,10 +65,9 @@ export function EditPlayerModal({
           label="Initiative"
           type="number"
           inputMode="numeric"
-          value={currentPlayer?.initiative ?? ''}
+          value={pInitiative}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            const value = isNaN(parseInt(e.currentTarget.value)) ? null : parseInt(e.currentTarget.value);
-            setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, initiative: value });
+            setPInitiative(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
           }}
           onKeyPress={(e) => {
             if (e.key === 'Enter') {
@@ -81,10 +80,9 @@ export function EditPlayerModal({
           label="Dexterity"
           type="number"
           inputMode="numeric"
-          value={currentPlayer?.dex ?? ''}
+          value={pDex}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            const value = !isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : undefined;
-            setCurrentPlayer(currentPlayer === null ? null : { ...currentPlayer, dex: value ?? null });
+            setPDex(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
           }}
           onKeyPress={(e) => {
             if (e.key === 'Enter') {

@@ -12,6 +12,7 @@ interface IPlayerProps {
   onTogglePause: (player: IPlayer) => void;
   onEdit: (player: IPlayer) => void;
   isCurrentPlayer?: boolean;
+  isCombatStage?: boolean;
 }
 
 export function PlayerRow({
@@ -20,6 +21,7 @@ export function PlayerRow({
   onTogglePause,
   onEdit,
   isCurrentPlayer,
+  isCombatStage,
 }: IPlayerProps): React.ReactElement {
   return (
     <tr
@@ -40,6 +42,7 @@ export function PlayerRow({
       </td>
       <td>{player.initiative ?? '--'}</td>
       <td>{player.dex ?? '--'}</td>
+      <td>{isCombatStage === true && player.status === PlayerStatus.Active ? (player.order ?? '--') : '--'}</td>
       <td>
         <div className={styles.table_actions}>
           <button
@@ -51,15 +54,17 @@ export function PlayerRow({
           >
             {player.status === PlayerStatus.Paused ? <FightIcon className="icon" /> : <PauseIcon className="icon" />}
           </button>
-          <button
-            className="btn"
-            onClick={(e) => {
-              onDelete(player);
-              e.stopPropagation();
-            }}
-          >
-            <DeleteIcon className="icon" />
-          </button>
+          {isCombatStage === true ? null : (
+            <button
+              className="btn"
+              onClick={(e) => {
+                onDelete(player);
+                e.stopPropagation();
+              }}
+            >
+              <DeleteIcon className="icon" />
+            </button>
+          )}
         </div>
       </td>
     </tr>
