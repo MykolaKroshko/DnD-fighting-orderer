@@ -31,6 +31,7 @@ export default defineConfig(() => ({
   build: {
     outDir: './build',
     chunkSizeWarningLimit: 1800,
+    base: '/',
     minify: 'terser',
     manifest: true,
     sourcemap: false,
