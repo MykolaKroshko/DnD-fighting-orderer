@@ -143,6 +143,11 @@ function AddGameModal({
           onInput={(e: FormEvent<HTMLInputElement>) => {
             setFormInput(e.currentTarget.value);
           }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              onConfirmModal();
+            }
+          }}
         />
       </form>
     </Modal>
