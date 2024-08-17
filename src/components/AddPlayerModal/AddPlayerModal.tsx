@@ -71,7 +71,11 @@ export function AddPlayerModal({
       }}
       onConfirmModal={onConfirmModal}
     >
-      <form>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+      >
         <Input
           inputRef={nameRef}
           name="name"

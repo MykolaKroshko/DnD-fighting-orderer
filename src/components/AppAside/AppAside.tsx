@@ -135,7 +135,11 @@ function AddGameModal({
 }: IAddGameModalProps): React.ReactElement {
   return (
     <Modal isOpen={isModalOpen} title="Add new game" onCloseModal={onCloseModal} onConfirmModal={onConfirmModal}>
-      <form>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+      >
         <Input
           name="gameTitle"
           label="New game title"

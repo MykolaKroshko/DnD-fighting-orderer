@@ -58,7 +58,11 @@ export function EditPlayerModal({
       title={`Change ${currentPlayer?.name}'s details`}
       onConfirmModal={onConfirmModal}
     >
-      <form>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+      >
         <Input
           inputRef={inputRef}
           name="initiative"
