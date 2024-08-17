@@ -4,7 +4,7 @@
     "src": "dnd.ico"
   },
   "index-legacy.html": {
-    "file": "assets/index-legacy-C5FDMhBH.js",
+    "file": "assets/index-legacy-DsCjjd_U.js",
     "name": "index",
     "src": "index-legacy.html",
     "isEntry": true,
@@ -13,12 +13,12 @@
     ]
   },
   "index.html": {
-    "file": "assets/index-DpqelgC-.js",
+    "file": "assets/index-CSUMom6x.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "css": [
-      "assets/index-CG_1x5wy.css"
+      "assets/index-C1xAXlOQ.css"
     ],
     "assets": [
       "assets/dnd-B3GQucvu.ico"
