@@ -1,15 +1,15 @@
 import styles from './styles.module.scss';
 import clsx from 'clsx';
-import React, { type FormEvent, useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { GlobalContext } from '@/App';
 import SidebarIcon from '@/assets/icons/sidebar.svg?react';
 import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
 import { LayoutContext } from '@/components/AppLayout/AppLayout';
-import { Input } from '@/components/Input/Input';
-import { Modal } from '@/components/Modal/Modal';
 import { Pages } from '@/routes';
 import { type IGame } from '@/types';
+import { AddGameModal } from '@/components/AppGameModal/AppGameModal';
+import DeleteIcon from '@/assets/icons/delete.svg?react';
 
 const LS_LIST_KEY = 'dnd_fo_games_list';
 
@@ -59,6 +59,18 @@ export function AppAside(): React.ReactElement {
     onCloseModal();
   };
 
+  const onGameDelete = (game: IGame): void => {
+    const res = confirm(`Are you sure you want to delete game ${game.title}?`);
+    if (res) {
+      const newGames = games.filter((g) => g.id !== game.id);
+      setGames(newGames);
+      setGamesList(newGames);
+      if (currentGame?.id === game.id) {
+        setCurrentGame(null);
+      }
+    }
+  };
+
   return (
     <>
       <aside className={clsx(styles.sidebar, { [styles.open]: sidebarOpen })}>
@@ -70,7 +82,13 @@ export function AppAside(): React.ReactElement {
         <nav>
           <ul className={styles.list}>
             {games.map((game) => (
-              <ListItem game={game} currentGameId={currentGame?.id} setCurrentGame={setCurrentGame} key={game.id} />
+              <ListItem
+                game={game}
+                currentGameId={currentGame?.id}
+                setCurrentGame={setCurrentGame}
+                key={game.id}
+                onGameDelete={onGameDelete}
+              />
             ))}
           </ul>
         </nav>
@@ -100,13 +118,14 @@ interface IListItemProps {
   game: IGame;
   currentGameId: number | undefined;
   setCurrentGame: (game: IGame) => void;
+  onGameDelete: (game: IGame) => void;
 }
 
-function ListItem({ game, currentGameId, setCurrentGame }: IListItemProps): React.ReactElement {
+function ListItem({ game, currentGameId, setCurrentGame, onGameDelete }: IListItemProps): React.ReactElement {
   return (
-    <li>
+    <li className={styles.list_item}>
       <Link
-        className={clsx(styles.list_item, { [styles.active]: game.id === currentGameId })}
+        className={clsx(styles.list_link, { [styles.active]: game.id === currentGameId })}
         to={Pages.Root.replace(':id?', game.id.toString())}
         onClick={() => {
           setCurrentGame(game);
@@ -114,46 +133,14 @@ function ListItem({ game, currentGameId, setCurrentGame }: IListItemProps): Reac
       >
         {game.title}
       </Link>
-    </li>
-  );
-}
-
-interface IAddGameModalProps {
-  isModalOpen: boolean;
-  onCloseModal: () => void;
-  onConfirmModal: () => void;
-  formInput: string;
-  setFormInput: (value: string) => void;
-}
-
-function AddGameModal({
-  isModalOpen,
-  onConfirmModal,
-  onCloseModal,
-  formInput,
-  setFormInput,
-}: IAddGameModalProps): React.ReactElement {
-  return (
-    <Modal isOpen={isModalOpen} title="Add new game" onCloseModal={onCloseModal} onConfirmModal={onConfirmModal}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
+      <button
+        className={clsx('btn', styles.delete_btn)}
+        onClick={() => {
+          onGameDelete(game);
         }}
       >
-        <Input
-          name="gameTitle"
-          label="New game title"
-          value={formInput}
-          onInput={(e: FormEvent<HTMLInputElement>) => {
-            setFormInput(e.currentTarget.value);
-          }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              onConfirmModal();
-            }
-          }}
-        />
-      </form>
-    </Modal>
+        <DeleteIcon className="icon" />
+      </button>
+    </li>
   );
 }

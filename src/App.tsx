@@ -6,7 +6,7 @@ import { type IGame } from '@/types';
 
 interface IGlobalContext {
   currentGame: IGame | null;
-  setCurrentGame: (game: IGame) => void;
+  setCurrentGame: (game: IGame | null) => void;
 }
 
 export const GlobalContext = createContext<IGlobalContext>({
