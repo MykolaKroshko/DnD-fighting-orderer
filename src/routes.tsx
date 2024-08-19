@@ -4,7 +4,7 @@ import { AppLayout } from '@/components/AppLayout/AppLayout';
 import { MainPage } from '@/components/MainPage/MainPage';
 
 export enum Pages {
-  Root = '/:id?',
+  Root = 'DnD-fighting-orderer/:id?',
 }
 
 export const router = createBrowserRouter([

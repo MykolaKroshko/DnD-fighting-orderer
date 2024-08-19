@@ -1,6 +1,6 @@
 import styles from './styles.module.scss';
 import clsx from 'clsx';
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { GlobalContext } from '@/App';
 import SidebarIcon from '@/assets/icons/sidebar.svg?react';
@@ -8,8 +8,10 @@ import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
 import { LayoutContext } from '@/components/AppLayout/AppLayout';
 import { Pages } from '@/routes';
 import { type IGame } from '@/types';
-import { AddGameModal } from '@/components/AppGameModal/AppGameModal';
 import DeleteIcon from '@/assets/icons/delete.svg?react';
+import { Modal } from '@/components/Modal/Modal';
+import { AddGameModal } from '@/components/AddGameModal/AddGameModal';
+import { LS_GAME_DETAIL_KEY } from '@/components/MainPage/MainPage';
 
 const LS_LIST_KEY = 'dnd_fo_games_list';
 
@@ -22,12 +24,19 @@ const setGamesList = (games: IGame[]): void => {
   localStorage.setItem(LS_LIST_KEY, JSON.stringify(games));
 };
 
+enum ModalStatus {
+  None,
+  AddGame,
+  ConfirmDeleteGame,
+}
+
 export function AppAside(): React.ReactElement {
   const { setCurrentGame, currentGame } = useContext(GlobalContext);
   const { sidebarOpen, onToggleSidebar, isMobile } = useContext(LayoutContext);
-  const [games, setGames] = React.useState<IGame[]>(getGamesList());
-  const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
-  const [formInput, setFormInput] = React.useState<string>('');
+  const [games, setGames] = useState<IGame[]>(getGamesList());
+  const [selectedGame, setSelectedGame] = useState<IGame | null>(null);
+  const [modalStatus, setModalStatus] = useState<ModalStatus>(ModalStatus.None);
+  const [formInput, setFormInput] = useState<string>('');
   const { id } = useParams();
 
   useEffect(() => {
@@ -46,7 +55,8 @@ export function AppAside(): React.ReactElement {
   );
 
   const onCloseModal = (): void => {
-    setIsModalOpen(false);
+    setSelectedGame(null);
+    setModalStatus(ModalStatus.None);
     setFormInput('');
   };
 
@@ -59,16 +69,22 @@ export function AppAside(): React.ReactElement {
     onCloseModal();
   };
 
-  const onGameDelete = (game: IGame): void => {
-    const res = confirm(`Are you sure you want to delete game ${game.title}?`);
-    if (res) {
-      const newGames = games.filter((g) => g.id !== game.id);
+  const onGameDeleteRequest = (game: IGame): void => {
+    setSelectedGame(game);
+    setModalStatus(ModalStatus.ConfirmDeleteGame);
+  };
+
+  const onGameDelete = (): void => {
+    if (selectedGame !== null) {
+      const newGames = games.filter((g) => g.id !== selectedGame.id);
       setGames(newGames);
       setGamesList(newGames);
-      if (currentGame?.id === game.id) {
+      if (currentGame?.id === selectedGame.id) {
         setCurrentGame(null);
       }
+      localStorage.removeItem(LS_GAME_DETAIL_KEY + '__' + selectedGame.id);
     }
+    onCloseModal();
   };
 
   return (
@@ -87,7 +103,7 @@ export function AppAside(): React.ReactElement {
                 currentGameId={currentGame?.id}
                 setCurrentGame={setCurrentGame}
                 key={game.id}
-                onGameDelete={onGameDelete}
+                onGameDelete={onGameDeleteRequest}
               />
             ))}
           </ul>
@@ -96,7 +112,7 @@ export function AppAside(): React.ReactElement {
           type="button"
           className={styles.add_btn}
           onClick={() => {
-            setIsModalOpen(true);
+            setModalStatus(ModalStatus.AddGame);
           }}
         >
           Add new game
@@ -105,11 +121,18 @@ export function AppAside(): React.ReactElement {
       <div className={clsx(styles.sidebar_shade, { [styles.open]: sidebarOpen })} onClick={onToggleSidebar} />
       <AddGameModal
         formInput={formInput}
-        isModalOpen={isModalOpen}
+        isModalOpen={modalStatus === ModalStatus.AddGame}
         onCloseModal={onCloseModal}
         onConfirmModal={onConfirmModal}
         setFormInput={setFormInput}
       />
+      <Modal
+        isOpen={modalStatus === ModalStatus.ConfirmDeleteGame}
+        onCloseModal={onCloseModal}
+        onConfirmModal={onGameDelete}
+      >
+        <p>Are you sure you want to delete {selectedGame?.title}?</p>
+      </Modal>
     </>
   );
 }

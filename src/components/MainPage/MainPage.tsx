@@ -5,7 +5,7 @@ import { CombatStage } from '@/components/CombatStage/CombatStage';
 import { SetupStage } from '@/components/SetupStage/SetupStage';
 import { GameStatus, type IGameDetails } from '@/types';
 
-const LS_GAME_DETAIL_KEY = 'dnd_fo_game_details';
+export const LS_GAME_DETAIL_KEY = 'dnd_fo_game_details';
 
 const emptyGameDetails: IGameDetails = {
   gameId: 0,
