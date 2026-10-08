@@ -3,15 +3,15 @@ import clsx from 'clsx';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { GlobalContext } from '@/App';
+import DeleteIcon from '@/assets/icons/delete.svg?react';
 import SidebarIcon from '@/assets/icons/sidebar.svg?react';
 import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
+import { AddGameModal } from '@/components/AddGameModal/AddGameModal';
 import { LayoutContext } from '@/components/AppLayout/AppLayout';
+import { LS_GAME_DETAIL_KEY } from '@/components/MainPage/MainPage';
+import { Modal } from '@/components/Modal/Modal';
 import { Pages } from '@/routes';
 import { type IGame } from '@/types';
-import DeleteIcon from '@/assets/icons/delete.svg?react';
-import { Modal } from '@/components/Modal/Modal';
-import { AddGameModal } from '@/components/AddGameModal/AddGameModal';
-import { LS_GAME_DETAIL_KEY } from '@/components/MainPage/MainPage';
 
 const LS_LIST_KEY = 'dnd_fo_games_list';
 
@@ -46,7 +46,7 @@ export function AppAside(): React.ReactElement {
         setCurrentGame(game);
       }
     }
-    // ignore dependency warning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const icon = useMemo(
