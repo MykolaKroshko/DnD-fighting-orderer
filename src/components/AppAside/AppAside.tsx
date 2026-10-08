@@ -17,7 +17,7 @@ const LS_LIST_KEY = 'dnd_fo_games_list';
 
 const getGamesList = (): IGame[] => {
   const gamesList = localStorage.getItem(LS_LIST_KEY);
-  return gamesList !== null ? JSON.parse(gamesList) : [];
+  return gamesList !== null ? (JSON.parse(gamesList) as IGame[]) : [];
 };
 
 const setGamesList = (games: IGame[]): void => {

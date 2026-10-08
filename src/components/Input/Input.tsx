@@ -3,7 +3,7 @@ import React, { type InputHTMLAttributes } from 'react';
 
 interface IInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef?: React.Ref<HTMLInputElement>;
 }
 
 export function Input({ label, type = 'text', inputRef, ...props }: IInputProps): React.ReactElement {

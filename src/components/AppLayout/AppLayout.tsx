@@ -33,8 +33,8 @@ export function AppLayout(): React.ReactNode {
     const mediaWatcher = window.matchMedia('(min-width: 768px)');
     setIsMobile(!mediaWatcher.matches);
 
-    function updateIsNarrowScreen(e: any): void {
-      setIsMobile(!(e.matches as boolean));
+    function updateIsNarrowScreen(e: MediaQueryListEvent): void {
+      setIsMobile(!e.matches);
     }
     mediaWatcher.addEventListener('change', updateIsNarrowScreen);
 

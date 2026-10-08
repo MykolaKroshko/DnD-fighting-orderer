@@ -18,7 +18,9 @@ const emptyGameDetails: IGameDetails = {
 
 const getLSGameDetail = (currentGameId: number): IGameDetails => {
   const gameDetail = localStorage.getItem(LS_GAME_DETAIL_KEY + '__' + currentGameId);
-  return gameDetail !== null ? JSON.parse(gameDetail) : { ...emptyGameDetails, gameId: currentGameId };
+  return gameDetail !== null
+    ? (JSON.parse(gameDetail) as IGameDetails)
+    : { ...emptyGameDetails, gameId: currentGameId };
 };
 
 const setLSGameDetail = (details: IGameDetails): void => {
