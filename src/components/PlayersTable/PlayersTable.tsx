@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { PlayerRow } from '@/components/PlayerRow/PlayerRow';
-import { ModalsStatus } from '@/components/SetupStage/SetupStage';
+import { ModalsStatus } from '@/components/SetupStage/modalsStatus';
 import { GameStatus, type IGameDetails, type IPlayer } from '@/types';
 
 interface IPlayerProps {

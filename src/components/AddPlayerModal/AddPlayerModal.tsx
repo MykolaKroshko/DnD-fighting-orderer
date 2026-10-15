@@ -1,73 +1,79 @@
-import React, { type FormEvent, useEffect, useMemo, useRef } from 'react';
+import React, { type FormEvent, useEffect, useRef } from 'react';
 import { Input } from '@/components/Input/Input';
 import { Modal } from '@/components/Modal/Modal';
-import { ModalsStatus } from '@/components/SetupStage/SetupStage';
+import { ModalsStatus } from '@/components/SetupStage/modalsStatus';
 import { type IPlayer, PlayerStatus, PlayerType } from '@/types';
+import { parseNumberInput } from '@/utils';
 
 interface IAddPlayerModalProps {
   status: ModalsStatus;
   onCloseModal: () => void;
-  onConfirmModal: (data: IPlayer) => void;
+  onConfirmModal: (data: Omit<IPlayer, 'id'>) => void;
 }
+
+const MODAL_CONFIG: Partial<Record<ModalsStatus, { title: string; defaultName: string; type: PlayerType }>> = {
+  [ModalsStatus.AddPlayer]: { title: 'Add Player', defaultName: 'New Player', type: PlayerType.Player },
+  [ModalsStatus.AddAlly]: { title: 'Add Ally', defaultName: 'New Ally', type: PlayerType.Ally },
+  [ModalsStatus.AddEnemy]: { title: 'Add Enemy', defaultName: 'New Enemy', type: PlayerType.Enemy },
+};
 
 export function AddPlayerModal({
   status,
   onCloseModal,
   onConfirmModal: onConfirmModalAction,
 }: IAddPlayerModalProps): React.ReactElement {
-  const title =
-    status === ModalsStatus.AddPlayer ? 'Add Player' : status === ModalsStatus.AddAlly ? 'Add Ally' : 'Add Enemy';
+  const config = MODAL_CONFIG[status];
+  const isOpen = config !== undefined;
   const [name, setName] = React.useState<string>('');
-  const [dex, setDex] = React.useState<number>('' as any);
-  const [initiative, setInitiative] = React.useState<number>('' as any);
+  const [dex, setDex] = React.useState<string>('');
+  const [initiative, setInitiative] = React.useState<string>('');
   const nameRef = useRef<HTMLInputElement>(null);
 
-  const newName = useMemo(() => {
-    const newName =
-      status === ModalsStatus.AddPlayer ? 'New Player' : status === ModalsStatus.AddAlly ? 'New Ally' : 'New Enemy';
-    setName(newName);
-    return newName;
-  }, [status]);
+  const resetForm = (): void => {
+    setName(config?.defaultName ?? '');
+    setDex('');
+    setInitiative('');
+  };
 
   useEffect(() => {
-    if (
-      nameRef.current !== null &&
-      [ModalsStatus.AddPlayer, ModalsStatus.AddAlly, ModalsStatus.AddEnemy].includes(status)
-    ) {
+    if (isOpen) {
+      setName(MODAL_CONFIG[status]?.defaultName ?? '');
+      setDex('');
+      setInitiative('');
       nameRef.current?.focus();
       nameRef.current?.select();
     }
-  }, [nameRef, status]);
+  }, [status, isOpen]);
 
   const onConfirmModal = (): void => {
+    if (config === undefined) {
+      return;
+    }
+
     onConfirmModalAction({
-      id: Math.round(Math.random() * 1_000_000_000),
       name,
-      dex: dex ?? null,
-      initiative: initiative ?? null,
-      type:
-        status === ModalsStatus.AddPlayer
-          ? PlayerType.Player
-          : status === ModalsStatus.AddAlly
-            ? PlayerType.Ally
-            : PlayerType.Enemy,
+      dex: parseNumberInput(dex, { integer: true }),
+      initiative: parseNumberInput(initiative, { integer: false }),
+      type: config.type,
       status: PlayerStatus.Active,
       order: undefined,
     });
-    setName(newName);
-    setDex('' as any);
-    setInitiative('' as any);
+    resetForm();
+  };
+
+  const onEnter = (e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      onConfirmModal();
+    }
   };
 
   return (
     <Modal
-      isOpen={[ModalsStatus.AddPlayer, ModalsStatus.AddAlly, ModalsStatus.AddEnemy].includes(status)}
-      title={title}
+      isOpen={isOpen}
+      title={config?.title}
       onCloseModal={() => {
         onCloseModal();
-        setName(newName);
-        setDex('' as any);
-        setInitiative('' as any);
+        resetForm();
       }}
       onConfirmModal={onConfirmModal}
     >
@@ -84,41 +90,31 @@ export function AddPlayerModal({
           onInput={(e: FormEvent<HTMLInputElement>) => {
             setName(e.currentTarget.value);
           }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              onConfirmModal();
-            }
-          }}
+          onKeyPress={onEnter}
         />
         <Input
           name="initiative"
           label="Initiative"
           type="number"
-          inputMode="numeric"
+          step="any"
+          inputMode="decimal"
           value={initiative}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            setInitiative(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
+            setInitiative(e.currentTarget.value);
           }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              onConfirmModal();
-            }
-          }}
+          onKeyPress={onEnter}
         />
         <Input
           name="dex"
           label="Dexterity"
           type="number"
+          step="1"
           inputMode="numeric"
           value={dex}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            setDex(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
+            setDex(e.currentTarget.value);
           }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              onConfirmModal();
-            }
-          }}
+          onKeyPress={onEnter}
         />
       </form>
     </Modal>

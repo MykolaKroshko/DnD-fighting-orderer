@@ -8,21 +8,11 @@ import SidebarIcon from '@/assets/icons/sidebar.svg?react';
 import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
 import { AddGameModal } from '@/components/AddGameModal/AddGameModal';
 import { LayoutContext } from '@/components/AppLayout/AppLayout';
-import { LS_GAME_DETAIL_KEY } from '@/components/MainPage/MainPage';
 import { Modal } from '@/components/Modal/Modal';
 import { Pages } from '@/routes';
+import { getGamesList, removeGameDetails, setGamesList } from '@/storage';
 import { type IGame } from '@/types';
-
-const LS_LIST_KEY = 'dnd_fo_games_list';
-
-const getGamesList = (): IGame[] => {
-  const gamesList = localStorage.getItem(LS_LIST_KEY);
-  return gamesList !== null ? (JSON.parse(gamesList) as IGame[]) : [];
-};
-
-const setGamesList = (games: IGame[]): void => {
-  localStorage.setItem(LS_LIST_KEY, JSON.stringify(games));
-};
+import { createGame, getGameTitle } from '@/utils';
 
 enum ModalStatus {
   None,
@@ -33,7 +23,7 @@ enum ModalStatus {
 export function AppAside(): React.ReactElement {
   const { setCurrentGame, currentGame } = useContext(GlobalContext);
   const { sidebarOpen, onToggleSidebar, isMobile } = useContext(LayoutContext);
-  const [games, setGames] = useState<IGame[]>(getGamesList());
+  const [games, setGames] = useState<IGame[]>(getGamesList);
   const [selectedGame, setSelectedGame] = useState<IGame | null>(null);
   const [modalStatus, setModalStatus] = useState<ModalStatus>(ModalStatus.None);
   const [formInput, setFormInput] = useState<string>('');
@@ -41,7 +31,7 @@ export function AppAside(): React.ReactElement {
 
   useEffect(() => {
     if (id !== undefined && games.length > 0) {
-      const game = games.find((game) => game.id === Number(id));
+      const game = games.find((game) => game.id === id);
       if (game !== undefined) {
         setCurrentGame(game);
       }
@@ -61,7 +51,7 @@ export function AppAside(): React.ReactElement {
   };
 
   const onConfirmModal = (): void => {
-    const newGame: IGame = { id: Math.round(Math.random() * 1_000_000_000), title: formInput };
+    const newGame = createGame(formInput);
     const newGames = [...games, newGame].toSorted((a, b) => a.title.localeCompare(b.title));
     setCurrentGame(newGame);
     setGames(newGames);
@@ -82,7 +72,7 @@ export function AppAside(): React.ReactElement {
       if (currentGame?.id === selectedGame.id) {
         setCurrentGame(null);
       }
-      localStorage.removeItem(LS_GAME_DETAIL_KEY + '__' + selectedGame.id);
+      removeGameDetails(selectedGame.id);
     }
     onCloseModal();
   };
@@ -131,7 +121,7 @@ export function AppAside(): React.ReactElement {
         onCloseModal={onCloseModal}
         onConfirmModal={onGameDelete}
       >
-        <p>Are you sure you want to delete {selectedGame?.title}?</p>
+        <p>Are you sure you want to delete {getGameTitle(selectedGame?.title ?? '')}?</p>
       </Modal>
     </>
   );
@@ -139,7 +129,7 @@ export function AppAside(): React.ReactElement {
 
 interface IListItemProps {
   game: IGame;
-  currentGameId: number | undefined;
+  currentGameId: string | undefined;
   setCurrentGame: (game: IGame) => void;
   onGameDelete: (game: IGame) => void;
 }
@@ -149,12 +139,12 @@ function ListItem({ game, currentGameId, setCurrentGame, onGameDelete }: IListIt
     <li className={styles.list_item}>
       <Link
         className={clsx(styles.list_link, { [styles.active]: game.id === currentGameId })}
-        to={Pages.Root.replace(':id?', game.id.toString())}
+        to={Pages.Root.replace(':id?', game.id)}
         onClick={() => {
           setCurrentGame(game);
         }}
       >
-        {game.title}
+        {getGameTitle(game.title)}
       </Link>
       <button
         className={clsx('btn', styles.delete_btn)}

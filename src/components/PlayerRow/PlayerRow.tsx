@@ -5,6 +5,7 @@ import DeleteIcon from '@/assets/icons/delete.svg?react';
 import FightIcon from '@/assets/icons/fight.svg?react';
 import PauseIcon from '@/assets/icons/pause.svg?react';
 import { type IPlayer, PlayerStatus, PlayerType } from '@/types';
+import { getPlayerName } from '@/utils';
 
 interface IPlayerProps {
   player: IPlayer;
@@ -38,7 +39,7 @@ export function PlayerRow({
           onEdit(player);
         }}
       >
-        {player.name}
+        {getPlayerName(player.name)}
       </td>
       <td>{player.initiative ?? '--'}</td>
       <td>{player.dex ?? '--'}</td>

@@ -3,45 +3,24 @@ import React, { useContext, useEffect, useMemo } from 'react';
 import { GlobalContext } from '@/App';
 import { CombatStage } from '@/components/CombatStage/CombatStage';
 import { SetupStage } from '@/components/SetupStage/SetupStage';
+import { getGameDetails, setGameDetails as saveGameDetails } from '@/storage';
 import { GameStatus, type IGameDetails } from '@/types';
-
-export const LS_GAME_DETAIL_KEY = 'dnd_fo_game_details';
-
-const emptyGameDetails: IGameDetails = {
-  gameId: 0,
-  status: GameStatus.Setup,
-  players: [],
-  allies: [],
-  enemies: [],
-  round: 1,
-};
-
-const getLSGameDetail = (currentGameId: number): IGameDetails => {
-  const gameDetail = localStorage.getItem(LS_GAME_DETAIL_KEY + '__' + currentGameId);
-  return gameDetail !== null
-    ? (JSON.parse(gameDetail) as IGameDetails)
-    : { ...emptyGameDetails, gameId: currentGameId };
-};
-
-const setLSGameDetail = (details: IGameDetails): void => {
-  localStorage.setItem(LS_GAME_DETAIL_KEY + '__' + details.gameId, JSON.stringify(details));
-};
+import { createEmptyGameDetails } from '@/utils';
 
 export function MainPage(): React.ReactElement {
   const { currentGame } = useContext(GlobalContext);
-  const [gameDetails, setGameDetails] = React.useState<IGameDetails>({
-    ...emptyGameDetails,
-    gameId: currentGame?.id ?? 0,
-  });
+  const [gameDetails, setGameDetails] = React.useState<IGameDetails>(() =>
+    createEmptyGameDetails(currentGame?.id ?? '')
+  );
 
   function updateGameDetails(newDetails: IGameDetails): void {
     setGameDetails(newDetails);
-    setLSGameDetail(newDetails);
+    saveGameDetails(newDetails);
   }
 
   useEffect(() => {
     if (currentGame?.id !== undefined) {
-      setGameDetails(getLSGameDetail(currentGame.id));
+      setGameDetails(getGameDetails(currentGame.id));
     }
   }, [currentGame?.id]);
 

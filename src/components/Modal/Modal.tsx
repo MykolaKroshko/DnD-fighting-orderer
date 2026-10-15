@@ -9,9 +9,17 @@ interface IModalProps {
   isOpen: boolean;
   onCloseModal: () => void;
   onConfirmModal: () => void;
+  confirmLabel?: string;
 }
 
-export function Modal({ children, isOpen, title, onCloseModal, onConfirmModal }: IModalProps): React.ReactElement {
+export function Modal({
+  children,
+  isOpen,
+  title,
+  confirmLabel = 'Save',
+  onCloseModal,
+  onConfirmModal,
+}: IModalProps): React.ReactElement {
   return (
     <div className={clsx(styles.shade, { [styles.open]: isOpen })}>
       <div className={styles.modal}>
@@ -27,7 +35,7 @@ export function Modal({ children, isOpen, title, onCloseModal, onConfirmModal }:
             Cancel
           </button>
           <button className="btn" onClick={onConfirmModal}>
-            Save
+            {confirmLabel}
           </button>
         </footer>
       </div>

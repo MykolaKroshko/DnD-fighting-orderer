@@ -2,7 +2,7 @@
 
 import legacy from '@vitejs/plugin-legacy';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import svgr from 'vite-plugin-svgr';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import stylelint from 'vite-plugin-stylelint';
@@ -22,12 +22,6 @@ export default defineConfig(() => ({
       targets: ['last 2 versions'],
     }),
   ],
-  esbuild: {
-    target: 'esnext',
-    supported: {
-      'top-level-await': true,
-    },
-  },
   base: '/DnD-fighting-orderer/',
   build: {
     outDir: './build',

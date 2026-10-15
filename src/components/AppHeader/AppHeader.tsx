@@ -5,6 +5,7 @@ import { GlobalContext } from '@/App';
 import SidebarIcon from '@/assets/icons/sidebar.svg?react';
 import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
 import { LayoutContext } from '@/components/AppLayout/AppLayout';
+import { getGameTitle } from '@/utils';
 
 export function AppHeader(): React.ReactNode {
   const { currentGame } = useContext(GlobalContext);
@@ -18,7 +19,7 @@ export function AppHeader(): React.ReactNode {
       >
         {!isMobile && !sidebarOpen ? <SidebarWideIcon className="icon" /> : <SidebarIcon className="icon" />}
       </button>
-      <h2 className={styles.title}>{currentGame?.title}</h2>
+      <h2 className={styles.title}>{currentGame === null ? null : getGameTitle(currentGame.title)}</h2>
     </header>
   );
 }

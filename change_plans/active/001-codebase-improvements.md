@@ -157,3 +157,16 @@ Cleanup done as planned, then the owner upgraded every dependency to its latest 
   - `import-x/no-cycle` cannot resolve the `@/` alias (same as before), so it still cannot see the `SetupStage` cycles; adding `eslint-import-resolver-typescript` would make it work and flag them (Phase 2 fixes them).
   - `css-modules/no-undef-class` warns in `CombatStage` for the same alias reason (it imports `SetupStage`'s styles, fixed by Phase 2.4).
   - `@eslint-react/set-state-in-effect` and `use-state` warnings point at code Phase 1 and 2 already rewrite.
+
+## Phase 1 outcome (done, not yet checked in a browser)
+
+All of 1.1 to 1.11 are implemented; `yarn lint`, `yarn tsc`, `yarn test` (46 tests in `src/utils.test.ts` and `src/storage.test.ts`) and `yarn build` pass.
+
+Notes and deviations:
+- `react-toastify` v11 injects its own CSS, so no stylesheet import was added; `<ToastContainer />` is mounted in `AppLayout`.
+- The pre-commit hook is now `yarn lint && yarn tsc && yarn test`.
+- `Modal` got an optional `confirmLabel` prop (the Finish Combat confirmation says "Finish", not "Save").
+- A blocked Start Combat / Next Player button also gets a `title` tooltip with the reason, as agreed.
+- Ids are `crypto.randomUUID()` strings; data saved with numeric ids is rejected by `storage.ts` and the app starts empty.
+- Still open from the manual checklist: click-through in the browser (decimal initiative, pause-passes-turn, Finish Combat confirmation, blocked buttons showing toasts).
+- Remaining lint warnings are the known `set-state-in-effect` ones in `AddPlayerModal`, `EditPlayerModal`, `MainPage`, `AppLayout`, plus `css-modules/no-undef-class` in `CombatStage` (fixed by Phase 2).

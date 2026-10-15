@@ -1,25 +1,25 @@
 import styles from './styles.module.scss';
 import clsx from 'clsx';
 import React from 'react';
+import { toast } from 'react-toastify';
 import { AddPlayerModal } from '@/components/AddPlayerModal/AddPlayerModal';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
 import { Modal } from '@/components/Modal/Modal';
 import { PlayersTable } from '@/components/PlayersTable/PlayersTable';
-import { type IGameDetails, type IPlayer, PlayerStatus, type PlayerType } from '@/types';
-import { getDetailsKeyByPlayerType, updatePlayersOrder } from '@/utils';
+import { ModalsStatus } from '@/components/SetupStage/modalsStatus';
+import { type IGameDetails, type IPlayer, type PlayerType } from '@/types';
+import {
+  createPlayer,
+  getDetailsKeyByPlayerType,
+  getPlayerName,
+  getStartCombatBlockReason,
+  toggleParticipantPause,
+  updatePlayersOrder,
+} from '@/utils';
 
 interface ISetupStageProps {
   details: IGameDetails;
   updateGameDetails: (newDetails: IGameDetails) => void;
-}
-
-export enum ModalsStatus {
-  None,
-  AddPlayer,
-  AddAlly,
-  AddEnemy,
-  DeletePlayer,
-  ChangeInitiative,
 }
 
 export function SetupStage({ details, updateGameDetails }: ISetupStageProps): React.ReactElement {
@@ -31,16 +31,16 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
     setCurrentPlayer(null);
   }
 
-  function onConfirmModal(data: IPlayer): void {
+  function onConfirmModal(data: Omit<IPlayer, 'id'>): void {
     const type = getDetailsKeyByPlayerType(data.type);
     onCloseModal();
     updateGameDetails({
       ...details,
-      [type]: [...details[type], data].toSorted((a, b) => a.name.localeCompare(b.name)),
+      [type]: [...details[type], createPlayer(data)].toSorted((a, b) => a.name.localeCompare(b.name)),
     });
   }
 
-  function onDeletePlayer(id: number, type: PlayerType): void {
+  function onDeletePlayer(id: string, type: PlayerType): void {
     const typeKey = getDetailsKeyByPlayerType(type);
     const players = details[typeKey].filter((player) => player.id !== id);
     updateGameDetails({
@@ -49,30 +49,19 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
     });
   }
 
+  const startCombatBlockReason = getStartCombatBlockReason(details);
+
   function onChangeGameMode(): void {
-    if (
-      details.players.every((p: IPlayer) => p.status === PlayerStatus.Paused || typeof p.initiative === 'number') &&
-      details.allies.every((p: IPlayer) => p.status === PlayerStatus.Paused || typeof p.initiative === 'number') &&
-      details.enemies.every((p: IPlayer) => p.status === PlayerStatus.Paused || typeof p.initiative === 'number')
-    ) {
-      updateGameDetails(updatePlayersOrder(details));
-    } else {
-      alert('All players must have an initiative value or be paused to start a combat.');
+    if (startCombatBlockReason !== null) {
+      toast.info(startCombatBlockReason);
+      return;
     }
+
+    updateGameDetails(updatePlayersOrder(details));
   }
 
   function onRequestToggleUserPaused(player: IPlayer): void {
-    const typeKey = getDetailsKeyByPlayerType(player.type);
-    updateGameDetails({
-      ...details,
-      [typeKey]: [
-        ...details[typeKey].map((p) =>
-          p.id === player.id
-            ? { ...p, status: p.status === PlayerStatus.Active ? PlayerStatus.Paused : PlayerStatus.Active }
-            : p
-        ),
-      ],
-    });
+    updateGameDetails(toggleParticipantPause(details, player));
   }
 
   function onConfirmEditPlayerModal(player: IPlayer): void {
@@ -112,7 +101,12 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
         >
           Add Enemy
         </button>
-        <button className={clsx('btn', styles.change_status)} onClick={onChangeGameMode}>
+        <button
+          className={clsx('btn', styles.change_status)}
+          aria-disabled={startCombatBlockReason !== null}
+          title={startCombatBlockReason ?? undefined}
+          onClick={onChangeGameMode}
+        >
           Start Combat
         </button>
       </div>
@@ -133,7 +127,7 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
           }
         }}
       >
-        <p>Are you sure you want to delete {currentPlayer?.name}?</p>
+        <p>Are you sure you want to delete {getPlayerName(currentPlayer?.name ?? '')}?</p>
       </Modal>
       {currentPlayer !== null && (
         <EditPlayerModal
