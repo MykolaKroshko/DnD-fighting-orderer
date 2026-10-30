@@ -5,6 +5,7 @@ import {
   createGame,
   createPlayer,
   getActivePlayers,
+  getDetailsKeyByPlayerType,
   getGameTitle,
   getNextTurnBlockReason,
   getPlayerName,
@@ -275,5 +276,133 @@ describe('toggleParticipantPause', () => {
     const { d, b } = setup();
     const result = toggleParticipantPause(toggleParticipantPause(d, b), b);
     expect(orderedNames(result)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('returns the details unchanged for an unknown participant', () => {
+    const d = details({ players: [player()] });
+    expect(toggleParticipantPause(d, player({ id: 'ghost' }))).toBe(d);
+  });
+
+  it('does not look for the participant in a different type array', () => {
+    const hero = player();
+    const d = details({ players: [hero] });
+    expect(toggleParticipantPause(d, { ...hero, type: PlayerType.Enemy })).toBe(d);
+  });
+
+  it('keeps the round when the paused current participant is not last', () => {
+    const { d, a } = setup();
+    expect(toggleParticipantPause(d, a).round).toBe(1);
+  });
+});
+
+describe('getDetailsKeyByPlayerType', () => {
+  it('maps each participant type to its array key', () => {
+    expect(getDetailsKeyByPlayerType(PlayerType.Player)).toBe('players');
+    expect(getDetailsKeyByPlayerType(PlayerType.Ally)).toBe('allies');
+    expect(getDetailsKeyByPlayerType(PlayerType.Enemy)).toBe('enemies');
+  });
+});
+
+describe('createEmptyGameDetails', () => {
+  it('starts in setup, on round 1, with no participants or current participant', () => {
+    expect(createEmptyGameDetails('g1')).toEqual({
+      gameId: 'g1',
+      status: GameStatus.Setup,
+      players: [],
+      allies: [],
+      enemies: [],
+      round: 1,
+    });
+  });
+});
+
+describe('updatePlayersOrder edge cases', () => {
+  it('puts participants without initiative after those with one, even a negative one', () => {
+    const result = updatePlayersOrder(
+      details({ players: [player({ name: 'none', initiative: null }), player({ name: 'neg', initiative: -5 })] })
+    );
+    expect(orderedNames(result)).toEqual(['neg', 'none']);
+  });
+
+  it('puts participants without dex after those with one on a tie', () => {
+    const result = updatePlayersOrder(
+      details({ players: [player({ name: 'nodex', dex: null }), player({ name: 'dex', dex: 0 })] })
+    );
+    expect(orderedNames(result)).toEqual(['dex', 'nodex']);
+  });
+
+  it('keeps input order for a full tie', () => {
+    const result = updatePlayersOrder(details({ players: [player({ name: 'first' }), player({ name: 'second' })] }));
+    expect(orderedNames(result)).toEqual(['first', 'second']);
+  });
+
+  it('splits participants back into their own arrays', () => {
+    const result = updatePlayersOrder(
+      details({
+        players: [player({ name: 'hero' })],
+        allies: [player({ name: 'ally', type: PlayerType.Ally })],
+        enemies: [player({ name: 'orc', type: PlayerType.Enemy })],
+      })
+    );
+    expect(result.players.map((p) => p.name)).toEqual(['hero']);
+    expect(result.allies.map((p) => p.name)).toEqual(['ally']);
+    expect(result.enemies.map((p) => p.name)).toEqual(['orc']);
+  });
+
+  it('does not mutate its input', () => {
+    const input = details({ players: [player({ initiative: 1 }), player({ initiative: 2 })] });
+    const snapshot = structuredClone(input);
+    updatePlayersOrder(input);
+    expect(input).toEqual(snapshot);
+  });
+});
+
+describe('getActivePlayers', () => {
+  it('returns only active participants sorted by order', () => {
+    const d = updatePlayersOrder(
+      details({
+        players: [player({ name: 'slow', initiative: 1 }), player({ name: 'paused', status: PlayerStatus.Paused })],
+        enemies: [player({ name: 'fast', type: PlayerType.Enemy, initiative: 9 })],
+      })
+    );
+    expect(getActivePlayers(d).map((p) => p.name)).toEqual(['fast', 'slow']);
+  });
+});
+
+describe('getNextTurnBlockReason', () => {
+  it('allows the turn to advance while someone is active', () => {
+    const d = updatePlayersOrder(details({ players: [player()] }));
+    expect(getNextTurnBlockReason(d)).toBeNull();
+  });
+
+  it('blocks when everyone is paused', () => {
+    const d = updatePlayersOrder(details({ players: [player({ status: PlayerStatus.Paused })] }));
+    expect(getNextTurnBlockReason(d)).toMatch(/paused/);
+  });
+});
+
+describe('advanceTurn edge cases', () => {
+  it('starts from the first participant without a new round when the current one is unknown', () => {
+    const a = player({ initiative: 20 });
+    const b = player({ initiative: 10 });
+    const d = { ...updatePlayersOrder(details({ players: [a, b] })), currentPlayerId: undefined };
+    const result = advanceTurn(d);
+    expect(result.currentPlayerId).toBe(a.id);
+    expect(result.round).toBe(1);
+  });
+
+  it('keeps a lone participant current and counts a round on every turn', () => {
+    const only = player();
+    const d = updatePlayersOrder(details({ players: [only] }));
+    const result = advanceTurn(advanceTurn(d));
+    expect(result.currentPlayerId).toBe(only.id);
+    expect(result.round).toBe(3);
+  });
+
+  it('does not mutate its input', () => {
+    const d = updatePlayersOrder(details({ players: [player({ initiative: 2 }), player({ initiative: 1 })] }));
+    const snapshot = structuredClone(d);
+    advanceTurn(d);
+    expect(d).toEqual(snapshot);
   });
 });

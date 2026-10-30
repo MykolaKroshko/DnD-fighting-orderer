@@ -16,14 +16,19 @@ const MODAL_CONFIG: Record<PlayerType, { title: string; defaultName: string }> =
   [PlayerType.Enemy]: { title: 'Add Enemy', defaultName: 'New Enemy' },
 };
 
-export function AddPlayerModal({
+/** Remounted for every opening (see `key`), so the form starts with the default name already selected. */
+export function AddPlayerModal(props: IAddPlayerModalProps): React.ReactElement {
+  return <AddPlayerForm key={props.playerType ?? 'closed'} {...props} />;
+}
+
+function AddPlayerForm({
   playerType,
   onCloseModal,
   onConfirmModal: onConfirmModalAction,
 }: IAddPlayerModalProps): React.ReactElement {
   const config = playerType === null ? undefined : MODAL_CONFIG[playerType];
   const isOpen = playerType !== null;
-  const [name, setName] = React.useState<string>('');
+  const [name, setName] = React.useState<string>(config?.defaultName ?? '');
   const [dex, setDex] = React.useState<string>('');
   const [initiative, setInitiative] = React.useState<string>('');
   const nameRef = useRef<HTMLInputElement>(null);
@@ -36,13 +41,10 @@ export function AddPlayerModal({
 
   useEffect(() => {
     if (isOpen) {
-      setName(playerType === null ? '' : MODAL_CONFIG[playerType].defaultName);
-      setDex('');
-      setInitiative('');
       nameRef.current?.focus();
       nameRef.current?.select();
     }
-  }, [playerType, isOpen]);
+  }, [isOpen]);
 
   const onConfirmModal = (): void => {
     if (playerType === null) {

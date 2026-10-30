@@ -89,3 +89,111 @@ describe('game details', () => {
     expect(localStorage.getItem(detailsKey('g1'))).toBeNull();
   });
 });
+
+describe('games list validation', () => {
+  it('drops the whole list when any item is invalid', () => {
+    localStorage.setItem(GAMES_KEY, JSON.stringify([{ id: 'a', title: 'Fine' }, { id: 'b' }]));
+    expect(getGamesList()).toEqual([]);
+  });
+
+  it('keeps only id and title of each game', () => {
+    localStorage.setItem(GAMES_KEY, JSON.stringify([{ id: 'a', title: 'Fine', extra: true }]));
+    expect(getGamesList()).toEqual([{ id: 'a', title: 'Fine' }]);
+  });
+
+  it('keeps blank titles', () => {
+    setGamesList([{ id: 'a', title: '' }]);
+    expect(getGamesList()).toEqual([{ id: 'a', title: '' }]);
+  });
+});
+
+describe('game details validation', () => {
+  const store = (id: string, value: unknown): void => localStorage.setItem(detailsKey(id), JSON.stringify(value));
+  const empty = (id: string): IGameDetails => createEmptyGameDetails(id);
+
+  it('uses the requested game id, not the stored one', () => {
+    store('g1', { ...empty('other'), players: [storedPlayer] });
+    expect(getGameDetails('g1').gameId).toBe('g1');
+  });
+
+  it.each([
+    ['an unknown participant type', { type: 'Dragon' }],
+    ['an unknown participant status', { status: 'Sleeping' }],
+    ['a missing participant name', { name: undefined }],
+  ])('falls back to the empty state for %s', (_label, override) => {
+    store('g1', { ...empty('g1'), enemies: [{ ...storedPlayer, ...override }] });
+    expect(getGameDetails('g1')).toEqual(empty('g1'));
+  });
+
+  it('falls back to the empty state for an unknown game status', () => {
+    store('g1', { ...empty('g1'), status: 'Paused' });
+    expect(getGameDetails('g1')).toEqual(empty('g1'));
+  });
+
+  it('falls back to the empty state when the round is missing', () => {
+    store('g1', { ...empty('g1'), round: undefined });
+    expect(getGameDetails('g1')).toEqual(empty('g1'));
+  });
+
+  it('falls back to the empty state when a participant array is missing', () => {
+    store('g1', { ...empty('g1'), allies: undefined });
+    expect(getGameDetails('g1')).toEqual(empty('g1'));
+  });
+
+  it('drops a non-string current participant id', () => {
+    store('g1', { ...empty('g1'), currentPlayerId: 5 });
+    expect(getGameDetails('g1').currentPlayerId).toBeUndefined();
+  });
+
+  it('turns a missing or invalid order into undefined', () => {
+    store('g1', {
+      ...empty('g1'),
+      players: [{ ...storedPlayer, order: 'first' }],
+      allies: [{ ...storedPlayer, id: 'p2', order: undefined }],
+    });
+    const loaded = getGameDetails('g1');
+    expect(loaded.players[0].order).toBeUndefined();
+    expect(loaded.allies[0].order).toBeUndefined();
+  });
+
+  it('keeps games independent of each other', () => {
+    setGameDetails({ ...empty('g1'), round: 4 });
+    setGameDetails({ ...empty('g2'), round: 7 });
+    removeGameDetails('g1');
+    expect(getGameDetails('g1').round).toBe(1);
+    expect(getGameDetails('g2').round).toBe(7);
+  });
+});
+
+describe('unavailable storage', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('swallows write failures', () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('full', 'QuotaExceededError');
+    });
+    expect(() => {
+      setGamesList([{ id: 'a', title: 'A' }]);
+      setGameDetails(createEmptyGameDetails('g1'));
+    }).not.toThrow();
+  });
+
+  it('swallows remove failures', () => {
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    expect(() => {
+      removeGameDetails('g1');
+    }).not.toThrow();
+  });
+
+  it('falls back to the empty state when reading throws', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    expect(getGamesList()).toEqual([]);
+    expect(getGameDetails('g1')).toEqual(createEmptyGameDetails('g1'));
+  });
+});
