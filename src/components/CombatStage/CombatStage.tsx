@@ -1,10 +1,10 @@
+import styles from './styles.module.scss';
 import clsx from 'clsx';
 import React from 'react';
 import { toast } from 'react-toastify';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
 import { Modal } from '@/components/Modal/Modal';
 import { PlayersTable } from '@/components/PlayersTable/PlayersTable';
-import styles from '@/components/SetupStage/styles.module.scss';
 import { GameStatus, type IGameDetails, type IPlayer, PlayerStatus } from '@/types';
 import {
   advanceTurn,
@@ -98,12 +98,7 @@ export function CombatStage({ details, updateGameDetails }: ICombatStageProps): 
           Finish Combat
         </button>
       </div>
-      <PlayersTable
-        details={details}
-        setCurrentPlayer={() => {}}
-        setModalsStatus={() => {}}
-        onRequestToggleUserPaused={onRequestToggleUserPaused}
-      />
+      <PlayersTable details={details} onRequestToggleUserPaused={onRequestToggleUserPaused} />
       <Modal
         isOpen={modalsStatus === ModalsStatus.ConfirmFinishCombat}
         title="Finish combat?"

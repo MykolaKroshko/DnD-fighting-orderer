@@ -1,6 +1,6 @@
 # Change plan 001: codebase improvements
 
-Status: **confirmed by the owner** (nothing implemented yet).
+Status (updated 2026-10-30): **Phases 1, 2 and 3 are implemented.** Remaining: browser click-through (Phase 1 checklist and Phase 2 manual checks). See "Phase 2 outcome" at the end of this file.
 Source: code review of `src/` plus a decision interview with the owner. Decisions are in the log below; the phases are ordered so each one can be committed and merged on its own.
 
 ## Decision log
@@ -91,7 +91,7 @@ Branch/commit per task where it makes sense. Start by running `yarn lint` and `y
 - A game saved with a blank title shows as "Untitled game" in the sidebar and header, and can be opened and deleted.
 - A corrupted `localStorage` value opens the app on an empty state.
 
-## Phase 2: architecture and routing
+## Phase 2: architecture and routing (done, see "Phase 2 outcome")
 
 ### 2.1 Routing for GitHub Pages
 - `createBrowserRouter(routes, { basename })` with `basename = import.meta.env.BASE_URL` minus the trailing slash. Routes become `/:id?` and a `*` route that redirects to `/` (replace).
@@ -158,7 +158,7 @@ Cleanup done as planned, then the owner upgraded every dependency to its latest 
   - `css-modules/no-undef-class` warns in `CombatStage` for the same alias reason (it imports `SetupStage`'s styles, fixed by Phase 2.4).
   - `@eslint-react/set-state-in-effect` and `use-state` warnings point at code Phase 1 and 2 already rewrite.
 
-## Phase 1 outcome (done, not yet checked in a browser)
+## Phase 1 outcome (done)
 
 All of 1.1 to 1.11 are implemented; `yarn lint`, `yarn tsc`, `yarn test` (46 tests in `src/utils.test.ts` and `src/storage.test.ts`) and `yarn build` pass.
 
@@ -170,3 +170,54 @@ Notes and deviations:
 - Ids are `crypto.randomUUID()` strings; data saved with numeric ids is rejected by `storage.ts` and the app starts empty.
 - Still open from the manual checklist: click-through in the browser (decimal initiative, pause-passes-turn, Finish Combat confirmation, blocked buttons showing toasts).
 - Remaining lint warnings are the known `set-state-in-effect` ones in `AddPlayerModal`, `EditPlayerModal`, `MainPage`, `AppLayout`, plus `css-modules/no-undef-class` in `CombatStage` (fixed by Phase 2).
+
+## Current status (verified 2026-10-20)
+
+Checked by reading `src/` and config, and by running `npx eslint .` (0 errors, 12 warnings), `yarn typecheck` (clean) and `yarn test` (46 passed). `yarn build` was not re-run.
+
+| Phase | Status |
+|-------|--------|
+| 1 (bugs, tests, toasts) | Done in code. Browser click-through still open (see Phase 1 outcome). |
+| 2 (routing, architecture) | **Not started.** |
+| 3 (tooling) | Done, with the deviations listed below. |
+
+### Phase 2 items, all still open
+
+| Item | Evidence in the code |
+|------|----------------------|
+| 2.1 GitHub Pages routing | `src/routes.tsx` still has the `Pages` enum with `'DnD-fighting-orderer/:id?'`, no `basename`, no `*` redirect. There is no `public/` folder, so no `404.html`, and `index.html` has no redirect script. |
+| 2.2 URL as source of truth | `App.tsx` still holds `currentGame` / `setCurrentGame` in `GlobalContext`. `AppAside` still owns the games list (`useState(getGamesList)`), still has the mount-only effect with the `eslint-disable react-hooks/exhaustive-deps`, and builds links with `Pages.Root.replace(':id?', game.id)`. Creating a game does not navigate, deleting the open game does not navigate to `/`, there is no `useCurrentGame()` hook and no redirect for unknown ids. |
+| 2.3 `GameView` split | `MainPage` still loads details in a `useEffect` (`setGameDetails(getGameDetails(...))`) and still wraps the stage in `useMemo`. |
+| 2.4 Component cycles | `PlayersTable` and `AddPlayerModal` still import `ModalsStatus` from `SetupStage/modalsStatus`. `PlayersTable` still takes `setCurrentPlayer` / `setModalsStatus` (not optional `onEdit` / `onDelete`), and `CombatStage` still passes no-op setters. `AddPlayerModal` still takes `status: ModalsStatus`, not `playerType`. `CombatStage` still imports `@/components/SetupStage/styles.module.scss`; there is no `CombatStage/styles.module.scss`. |
+
+Phase 2 removes two of the 12 remaining lint warnings: `css-modules/no-undef-class` in `CombatStage` (2.4) and `set-state-in-effect` in `MainPage` (2.3). The `set-state-in-effect` warnings in `AddPlayerModal`, `EditPlayerModal` and `AppLayout` are not covered by any Phase 2 item, so they stay unless a task is added.
+
+### Phase 1 spot checks against the code
+
+- 1.1: `vitest`, `react-toastify`, `src/setupTests.ts`, `vitest/globals` types, `test` script, pre-commit hook and `<ToastContainer />` in `AppLayout` are all present.
+- 1.2 to 1.4, 1.9, 1.10: `parseNumberInput`, `getActivePlayers`, `getStartCombatBlockReason`, `getNextTurnBlockReason`, `advanceTurn`, `toggleParticipantPause`, `createGame`, `createPlayer` exist in `src/utils.ts`; `src/storage.ts` holds the keys and safe get/set/remove helpers.
+- 1.5 to 1.8: Start Combat and Next Player use `aria-disabled` plus a toast, with no `alert()`; Finish Combat opens a confirmation `Modal`; `getPlayerName` ("Unnamed") and `getGameTitle` ("Untitled game") are used in the UI; `AddPlayerModal` resets its form in an effect.
+- 1.11: `src/utils.test.ts` and `src/storage.test.ts` exist (46 tests).
+
+### Phase 3 deviations from the written plan
+
+- `@eslint/js`, `typescript-eslint` and `globals` were **kept** in `devDependencies`: the plan said to remove them after confirming nothing imports them, but `eslint.config.js` imports all three.
+- `preview` is `yarn build && vite preview` (not `tsc -b && vite build && vite preview`); equivalent and Windows-safe.
+- The `typecheck` script replaced the plan's `yarn tsc`, and the pre-commit hook runs `yarn lint && yarn typecheck && yarn test`.
+- `eslint-import-resolver-typescript` is now installed, so the "known gap" that `import-x/no-cycle` cannot see the `@/` alias may be stale. Lint shows no cycle errors, but the `SetupStage` cycles still exist in the imports, so confirm the rule is actually active before relying on it.
+
+### Next steps
+
+1. Browser click-through of the Phase 1 checklist (decimal initiative, pause passes the turn, Finish Combat confirmation, blocked buttons with toasts, "Untitled game", corrupt storage).
+2. ~~Implement Phase 2~~ Done, see "Phase 2 outcome" below. Browser click-through of the Phase 2 manual checks is still open.
+
+## Phase 2 outcome (done, 2026-10-30)
+
+All of 2.1 to 2.4 are implemented; `npx eslint .` (0 errors, 9 warnings), typecheck, `vitest` (46 tests) and `vite build` pass.
+
+- **2.1:** `routes.tsx` uses `basename` from `import.meta.env.BASE_URL`, routes `/:id?` and a `*` redirect. `gamePath()` lives in `src/paths.ts` (not `routes.tsx`, to avoid a `routes` <-> `MainPage` cycle). `public/404.html` and the restore script in `index.html` were added (segmentCount 1).
+- **2.2:** `GlobalContext` and `useCurrentGame()` moved to `src/globalContext.ts` (this also removes the old `App` <-> `AppAside` import cycle). `App` owns `games`, `addGame`, `removeGame`. Creating a game navigates to it; deleting the open game navigates to `/`. `MainPage` redirects unknown ids to `/`.
+- **2.3:** `MainPage` renders a `GameView` keyed by game id with a lazy `useState` initializer.
+- **2.4:** `ModalsStatus` is private to `SetupStage` (`modalsStatus.ts` deleted). `AddPlayerModal` takes `playerType`. `PlayersTable` / `PlayerRow` take optional `onEdit` / `onDelete`; `CombatStage` has its own stylesheet.
+- **Not verified:** the browser checks (direct link, unknown id/path, refresh under the base path, switching games) and the `404.html` redirect on a real GitHub Pages host.
+- **Remaining warnings:** `set-state-in-effect` in `AddPlayerModal`, `EditPlayerModal`, `AppLayout` (no plan item covers them).

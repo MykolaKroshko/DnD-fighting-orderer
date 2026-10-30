@@ -1,29 +1,28 @@
 import React, { type FormEvent, useEffect, useRef } from 'react';
 import { Input } from '@/components/Input/Input';
 import { Modal } from '@/components/Modal/Modal';
-import { ModalsStatus } from '@/components/SetupStage/modalsStatus';
 import { type IPlayer, PlayerStatus, PlayerType } from '@/types';
 import { parseNumberInput } from '@/utils';
 
 interface IAddPlayerModalProps {
-  status: ModalsStatus;
+  playerType: PlayerType | null;
   onCloseModal: () => void;
   onConfirmModal: (data: Omit<IPlayer, 'id'>) => void;
 }
 
-const MODAL_CONFIG: Partial<Record<ModalsStatus, { title: string; defaultName: string; type: PlayerType }>> = {
-  [ModalsStatus.AddPlayer]: { title: 'Add Player', defaultName: 'New Player', type: PlayerType.Player },
-  [ModalsStatus.AddAlly]: { title: 'Add Ally', defaultName: 'New Ally', type: PlayerType.Ally },
-  [ModalsStatus.AddEnemy]: { title: 'Add Enemy', defaultName: 'New Enemy', type: PlayerType.Enemy },
+const MODAL_CONFIG: Record<PlayerType, { title: string; defaultName: string }> = {
+  [PlayerType.Player]: { title: 'Add Player', defaultName: 'New Player' },
+  [PlayerType.Ally]: { title: 'Add Ally', defaultName: 'New Ally' },
+  [PlayerType.Enemy]: { title: 'Add Enemy', defaultName: 'New Enemy' },
 };
 
 export function AddPlayerModal({
-  status,
+  playerType,
   onCloseModal,
   onConfirmModal: onConfirmModalAction,
 }: IAddPlayerModalProps): React.ReactElement {
-  const config = MODAL_CONFIG[status];
-  const isOpen = config !== undefined;
+  const config = playerType === null ? undefined : MODAL_CONFIG[playerType];
+  const isOpen = playerType !== null;
   const [name, setName] = React.useState<string>('');
   const [dex, setDex] = React.useState<string>('');
   const [initiative, setInitiative] = React.useState<string>('');
@@ -37,16 +36,16 @@ export function AddPlayerModal({
 
   useEffect(() => {
     if (isOpen) {
-      setName(MODAL_CONFIG[status]?.defaultName ?? '');
+      setName(playerType === null ? '' : MODAL_CONFIG[playerType].defaultName);
       setDex('');
       setInitiative('');
       nameRef.current?.focus();
       nameRef.current?.select();
     }
-  }, [status, isOpen]);
+  }, [playerType, isOpen]);
 
   const onConfirmModal = (): void => {
-    if (config === undefined) {
+    if (playerType === null) {
       return;
     }
 
@@ -54,7 +53,7 @@ export function AddPlayerModal({
       name,
       dex: parseNumberInput(dex, { integer: true }),
       initiative: parseNumberInput(initiative, { integer: false }),
-      type: config.type,
+      type: playerType,
       status: PlayerStatus.Active,
       order: undefined,
     });

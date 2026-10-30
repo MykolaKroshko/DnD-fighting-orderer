@@ -1,18 +1,17 @@
 import styles from './styles.module.scss';
 import clsx from 'clsx';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { GlobalContext } from '@/App';
+import React, { useContext, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import DeleteIcon from '@/assets/icons/delete.svg?react';
 import SidebarIcon from '@/assets/icons/sidebar.svg?react';
 import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
 import { AddGameModal } from '@/components/AddGameModal/AddGameModal';
 import { LayoutContext } from '@/components/AppLayout/AppLayout';
 import { Modal } from '@/components/Modal/Modal';
-import { Pages } from '@/routes';
-import { getGamesList, removeGameDetails, setGamesList } from '@/storage';
+import { GlobalContext, useCurrentGame } from '@/globalContext';
+import { gamePath } from '@/paths';
 import { type IGame } from '@/types';
-import { createGame, getGameTitle } from '@/utils';
+import { getGameTitle } from '@/utils';
 
 enum ModalStatus {
   None,
@@ -21,23 +20,13 @@ enum ModalStatus {
 }
 
 export function AppAside(): React.ReactElement {
-  const { setCurrentGame, currentGame } = useContext(GlobalContext);
+  const { games, addGame, removeGame } = useContext(GlobalContext);
+  const currentGame = useCurrentGame();
+  const navigate = useNavigate();
   const { sidebarOpen, onToggleSidebar, isMobile } = useContext(LayoutContext);
-  const [games, setGames] = useState<IGame[]>(getGamesList);
   const [selectedGame, setSelectedGame] = useState<IGame | null>(null);
   const [modalStatus, setModalStatus] = useState<ModalStatus>(ModalStatus.None);
   const [formInput, setFormInput] = useState<string>('');
-  const { id } = useParams();
-
-  useEffect(() => {
-    if (id !== undefined && games.length > 0) {
-      const game = games.find((game) => game.id === id);
-      if (game !== undefined) {
-        setCurrentGame(game);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const icon = useMemo(
     () => (isMobile ? <SidebarIcon className="icon" /> : <SidebarWideIcon className="icon" />),
@@ -51,12 +40,9 @@ export function AppAside(): React.ReactElement {
   };
 
   const onConfirmModal = (): void => {
-    const newGame = createGame(formInput);
-    const newGames = [...games, newGame].toSorted((a, b) => a.title.localeCompare(b.title));
-    setCurrentGame(newGame);
-    setGames(newGames);
-    setGamesList(newGames);
+    const newGame = addGame(formInput);
     onCloseModal();
+    void navigate(gamePath(newGame.id));
   };
 
   const onGameDeleteRequest = (game: IGame): void => {
@@ -66,13 +52,10 @@ export function AppAside(): React.ReactElement {
 
   const onGameDelete = (): void => {
     if (selectedGame !== null) {
-      const newGames = games.filter((g) => g.id !== selectedGame.id);
-      setGames(newGames);
-      setGamesList(newGames);
+      removeGame(selectedGame.id);
       if (currentGame?.id === selectedGame.id) {
-        setCurrentGame(null);
+        void navigate(gamePath());
       }
-      removeGameDetails(selectedGame.id);
     }
     onCloseModal();
   };
@@ -88,13 +71,7 @@ export function AppAside(): React.ReactElement {
         <nav>
           <ul className={styles.list}>
             {games.map((game) => (
-              <ListItem
-                game={game}
-                currentGameId={currentGame?.id}
-                setCurrentGame={setCurrentGame}
-                key={game.id}
-                onGameDelete={onGameDeleteRequest}
-              />
+              <ListItem game={game} currentGameId={currentGame?.id} key={game.id} onGameDelete={onGameDeleteRequest} />
             ))}
           </ul>
         </nav>
@@ -130,20 +107,13 @@ export function AppAside(): React.ReactElement {
 interface IListItemProps {
   game: IGame;
   currentGameId: string | undefined;
-  setCurrentGame: (game: IGame) => void;
   onGameDelete: (game: IGame) => void;
 }
 
-function ListItem({ game, currentGameId, setCurrentGame, onGameDelete }: IListItemProps): React.ReactElement {
+function ListItem({ game, currentGameId, onGameDelete }: IListItemProps): React.ReactElement {
   return (
     <li className={styles.list_item}>
-      <Link
-        className={clsx(styles.list_link, { [styles.active]: game.id === currentGameId })}
-        to={Pages.Root.replace(':id?', game.id)}
-        onClick={() => {
-          setCurrentGame(game);
-        }}
-      >
+      <Link className={clsx(styles.list_link, { [styles.active]: game.id === currentGameId })} to={gamePath(game.id)}>
         {getGameTitle(game.title)}
       </Link>
       <button

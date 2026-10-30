@@ -1,31 +1,20 @@
 import React, { useMemo } from 'react';
 import { PlayerRow } from '@/components/PlayerRow/PlayerRow';
-import { ModalsStatus } from '@/components/SetupStage/modalsStatus';
 import { GameStatus, type IGameDetails, type IPlayer } from '@/types';
 
 interface IPlayerProps {
   details: IGameDetails;
-  setCurrentPlayer: (p: IPlayer | null) => void;
-  setModalsStatus: (s: ModalsStatus) => void;
+  onEdit?: (player: IPlayer) => void;
+  onDelete?: (player: IPlayer) => void;
   onRequestToggleUserPaused: (player: IPlayer) => void;
 }
 
 export function PlayersTable({
   details,
-  setCurrentPlayer,
-  setModalsStatus,
+  onEdit,
+  onDelete,
   onRequestToggleUserPaused,
 }: IPlayerProps): React.ReactElement {
-  function onRequestDeletePlayer(player: IPlayer): void {
-    setCurrentPlayer(player);
-    setModalsStatus(ModalsStatus.DeletePlayer);
-  }
-
-  function onRequestEditPlayer(player: IPlayer): void {
-    setCurrentPlayer(player);
-    setModalsStatus(ModalsStatus.ChangeInitiative);
-  }
-
   const players = useMemo(() => {
     if (details.status === GameStatus.Setup) {
       return [...details.players, ...details.allies, ...details.enemies];
@@ -53,8 +42,8 @@ export function PlayersTable({
           <PlayerRow
             key={player.id}
             player={player}
-            onDelete={onRequestDeletePlayer}
-            onEdit={onRequestEditPlayer}
+            onDelete={onDelete}
+            onEdit={onEdit}
             onTogglePause={onRequestToggleUserPaused}
             isCurrentPlayer={details.currentPlayerId === player.id}
             isCombatStage={details.status === GameStatus.Combat}

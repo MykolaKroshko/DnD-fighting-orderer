@@ -6,8 +6,7 @@ import { AddPlayerModal } from '@/components/AddPlayerModal/AddPlayerModal';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
 import { Modal } from '@/components/Modal/Modal';
 import { PlayersTable } from '@/components/PlayersTable/PlayersTable';
-import { ModalsStatus } from '@/components/SetupStage/modalsStatus';
-import { type IGameDetails, type IPlayer, type PlayerType } from '@/types';
+import { type IGameDetails, type IPlayer, PlayerType } from '@/types';
 import {
   createPlayer,
   getDetailsKeyByPlayerType,
@@ -21,6 +20,21 @@ interface ISetupStageProps {
   details: IGameDetails;
   updateGameDetails: (newDetails: IGameDetails) => void;
 }
+
+enum ModalsStatus {
+  None,
+  AddPlayer,
+  AddAlly,
+  AddEnemy,
+  DeletePlayer,
+  ChangeInitiative,
+}
+
+const ADD_MODAL_PLAYER_TYPE: Partial<Record<ModalsStatus, PlayerType>> = {
+  [ModalsStatus.AddPlayer]: PlayerType.Player,
+  [ModalsStatus.AddAlly]: PlayerType.Ally,
+  [ModalsStatus.AddEnemy]: PlayerType.Enemy,
+};
 
 export function SetupStage({ details, updateGameDetails }: ISetupStageProps): React.ReactElement {
   const [modalsStatus, setModalsStatus] = React.useState<ModalsStatus>(ModalsStatus.None);
@@ -112,11 +126,21 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
       </div>
       <PlayersTable
         details={details}
-        setCurrentPlayer={setCurrentPlayer}
-        setModalsStatus={setModalsStatus}
+        onEdit={(player) => {
+          setCurrentPlayer(player);
+          setModalsStatus(ModalsStatus.ChangeInitiative);
+        }}
+        onDelete={(player) => {
+          setCurrentPlayer(player);
+          setModalsStatus(ModalsStatus.DeletePlayer);
+        }}
         onRequestToggleUserPaused={onRequestToggleUserPaused}
       />
-      <AddPlayerModal status={modalsStatus} onCloseModal={onCloseModal} onConfirmModal={onConfirmModal} />
+      <AddPlayerModal
+        playerType={ADD_MODAL_PLAYER_TYPE[modalsStatus] ?? null}
+        onCloseModal={onCloseModal}
+        onConfirmModal={onConfirmModal}
+      />
       <Modal
         isOpen={modalsStatus === ModalsStatus.DeletePlayer}
         onCloseModal={onCloseModal}

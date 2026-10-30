@@ -9,9 +9,9 @@ import { getPlayerName } from '@/utils';
 
 interface IPlayerProps {
   player: IPlayer;
-  onDelete: (player: IPlayer) => void;
+  onDelete?: (player: IPlayer) => void;
   onTogglePause: (player: IPlayer) => void;
-  onEdit: (player: IPlayer) => void;
+  onEdit?: (player: IPlayer) => void;
   isCurrentPlayer?: boolean;
   isCombatStage?: boolean;
 }
@@ -36,7 +36,7 @@ export function PlayerRow({
     >
       <td
         onClick={() => {
-          onEdit(player);
+          onEdit?.(player);
         }}
       >
         {getPlayerName(player.name)}
@@ -55,11 +55,11 @@ export function PlayerRow({
           >
             {player.status === PlayerStatus.Paused ? <FightIcon className="icon" /> : <PauseIcon className="icon" />}
           </button>
-          {isCombatStage === true ? null : (
+          {onDelete === undefined ? null : (
             <button
               className="btn"
               onClick={(e) => {
-                onDelete(player);
+                onDelete?.(player);
                 e.stopPropagation();
               }}
             >
