@@ -1,61 +1,59 @@
 # Backlog: future improvements and ideas
 
-Things that are not part of a current plan. Move an item into a numbered plan in `change_plans/active/` when it gets scheduled.
+Things that are not part of a finished plan. Every scheduled item links to its plan in [`active/`](active/README.md), which lists the plans and how they depend on each other. Finished work is in [`finished/`](finished/001-codebase-improvements.md).
 
-Planned work already written up: [001-codebase-improvements.md](active/001-codebase-improvements.md) (Phase 2, routing and the URL as the source of truth, is still to do).
+Legend: **Plan 0xx** = written up and ready to implement. **Done** = already in the code. **Dropped** = decided against. **Open** = no plan.
 
 ## Improvements
 
 ### Accessibility and UI
-- Rebuild `Modal` on the native `<dialog>` element (`showModal()`): Escape to close, focus trap, unmounted when closed, ARIA roles. The modal shade SCSS needs adapting to `::backdrop`.
-- `aria-label` on icon-only buttons (pause, delete, close, sidebar toggle).
-- Edit a participant through a real `<button>` in the name cell instead of `onClick` on the `<td>`, so it works from the keyboard.
-- Replace the repeated, deprecated `onKeyPress` Enter handlers with the form's `onSubmit`.
-- Edit modal: start with the cursor in Name when the name is blank.
-- Decide whether participants should stay sorted by name in Setup (today they are sorted when added, not when renamed).
+- Rebuild `Modal` on the native `<dialog>` element: Escape to close, focus trap, unmounted when closed, ARIA roles, `::backdrop`. **Plan [011](active/011-dialog-modals.md).**
+- `aria-label` on icon-only buttons (pause, delete, close, sidebar toggle). **Plan [010](active/010-row-and-button-ui.md).**
+- Edit a participant through a real `<button>` in the name cell. **Plan [010](active/010-row-and-button-ui.md).**
+- Replace the repeated, deprecated `onKeyPress` Enter handlers with the form's `onSubmit`. **Plan [011](active/011-dialog-modals.md).**
+- Edit modal: put the cursor in Name when the name is blank. **Dropped:** the edit modal always puts the cursor in Initiative and the name is optional; plan 011 keeps that with a test.
+- Decide whether participants stay sorted by name in Setup. **Decided:** yes, each group is sorted by name on add, clone, bulk add and rename. **Plan [008](active/008-clone-and-bulk-add.md).**
 
 ### Code and architecture
-- Replace the `players` / `allies` / `enemies` arrays with a single `participants` array and derive `order` instead of storing it (needs a storage migration).
-- Component tests (React Testing Library). Today only `utils` and `storage` are tested.
-- Fix the `set-state-in-effect` lint warnings (`AddPlayerModal`, `EditPlayerModal`, `MainPage`, `AppLayout`), for example by keying modals instead of resetting state in effects.
-- React 19 cleanups the lint config currently silences: `<Context>` as a provider instead of `<Context.Provider>`, `use(Context)` instead of `useContext`.
+- Replace the `players` / `allies` / `enemies` arrays with a single `participants` array and derive `order` (needs a storage migration). **Open, optional.** Reviewed with the owner: the arrays are already hidden behind `getDetailsKeyByPlayerType` and `getAllPlayers` (about 34 uses in 9 files), no planned feature needs the change, and it would mean a migration and rewriting most tests. The gain would be a derived `order` and no merge and split in `updatePlayersOrder`.
+- Component tests (React Testing Library). **Done.** `Modal`, `PlayerRow`, `AddPlayerModal`, `SetupStage`, `CombatStage` and an `App` integration test exist.
+- Fix the `set-state-in-effect` lint warnings. `AddPlayerModal` and `MainPage` are **done**; `EditPlayerModal` and `AppLayout` remain. **Plan [012](active/012-react-and-lint-cleanup.md).**
+- React 19 cleanups the lint config silences (`<Context>` as a provider, `use(Context)`). **Plan [012](active/012-react-and-lint-cleanup.md).**
 
 ### Tooling
-- Add `eslint-import-resolver-typescript` so `import-x/no-cycle` can resolve the `@/` alias and actually catch circular imports (it will report the existing ones until Phase 2 removes them).
-- Find a replacement for the dropped `no-unused-modules` rule (it is a no-op on ESLint 10).
-- Move to TypeScript 7 once `typescript-eslint` supports it (it currently requires `<6.1`).
-- Vite config cleanups reported by the build and test output:
-  - Replace the `vite-tsconfig-paths` plugin with Vite's native `resolve.tsconfigPaths: true`.
-- Refresh the browserslist database (`npx update-browserslist-db@latest`).
-- `Array.prototype.toSorted` is used in several places; add a polyfill or switch to `[...a].sort()` if older browsers matter.
-- `crypto.randomUUID()` needs HTTPS or `localhost`, so the dev server does not work over a plain-HTTP LAN address. Add a fallback if testing on a phone over the local network is wanted.
+- Add `eslint-import-resolver-typescript` so `import-x/no-cycle` resolves the `@/` alias. **Done** (installed).
+- Replacement for the dropped `no-unused-modules` rule. **Plan [013](active/013-tooling-cleanup.md)** (`knip`).
+- Move to TypeScript 7 once `typescript-eslint` supports it (it currently requires `<6.1`). **Open, blocked** by `typescript-eslint`.
+- Replace the `vite-tsconfig-paths` plugin with Vite's native `resolve.tsconfigPaths`. **Plan [013](active/013-tooling-cleanup.md).**
+- Refresh the browserslist database. **Plan [013](active/013-tooling-cleanup.md).**
+- `Array.prototype.toSorted` polyfill. **Dropped:** no support for old browsers.
+- `crypto.randomUUID()` needs a secure context, so the app breaks when the build is served over plain HTTP. **Plan [014](active/014-id-fallback.md).**
 
 ## Features (from the owner)
 
-HP tracking is the base for most of this list, so it should be designed first. Items marked with it depend on it.
+HP tracking is the base for the hit point features, so plan 002 comes first for plans 003 to 007. All the other plans are independent.
 
-### Hit points (depend on HP tracking)
-- **HP tracking** per participant (current and maximum). This is the foundation for everything below.
-- **HP change log** per character, with a one-click undo (revert) of the last change.
-- **Restore HP to maximum** in one click.
-- **Quick heal button** with a field for the amount to change.
-- **Temporary HP** support.
-- **Temporary reduction of maximum HP.**
-- **Long rest button** (restores HP, and likely resets temporary effects such as temporary HP and reduced maximum HP; exact rules to be decided).
-- **Death saves tracker** (successes and failures for a character at 0 HP).
+### Hit points
+- HP tracking per participant (current and maximum), with damage, heal and restore to maximum. **Plan [002](active/002-hp-base.md).**
+- Temporary HP. **Plan [003](active/003-temp-hp.md).**
+- Temporary change of the maximum HP, now the "Max HP bonus" (positive or negative; at 0 the character is permanently dead). **Plan [004](active/004-max-hp-bonus.md).**
+- HP change log with undo: one general log of 20 entries per game, cleared when combat starts. **Plan [005](active/005-hp-log.md).**
+- Quick heal and damage with an amount field, and restore to maximum in one click. **Plan [002](active/002-hp-base.md).**
+- Long rest button, per game and per participant, in Setup only. **Plan [006](active/006-long-rest.md).**
+- Death saves tracker, players only, shown in the table at 0 HP. **Plan [007](active/007-death-saves.md).**
 
 ### Game and participants
-- **Clone tokens**: duplicate a participant, for groups of identical enemies such as "Goblin 1 to 4".
-- **Bulk add enemies and ally NPCs**: add several at once (for example a count field in the add modal). Open questions: auto-numbering of names ("Goblin 1, 2, 3"), one shared initiative and dex or a separate value per copy. Overlaps with cloning tokens, so the two should probably be designed together.
-- **Export and import a game** as a file, as a backup beyond `localStorage`.
+- Clone tokens. **Plan [008](active/008-clone-and-bulk-add.md).**
+- Bulk add enemies and ally NPCs, with auto numbering and no shared initiative. **Plan [008](active/008-clone-and-bulk-add.md).**
+- Export and import a game as a file. **Plan [009](active/009-export-import.md).**
 
 ### UI
-- **Labels on buttons.** Open question: visible text labels, `aria-label`s for accessibility, or both. The `aria-label` part overlaps with the accessibility item above.
-- **Make the whole row clickable** to open the edit modal, instead of only the name cell. This interacts with the pause and delete buttons inside the row (they must not trigger the row click) and with the keyboard accessibility item above.
+- Labels on buttons (visible on wide screens, `aria-label`s everywhere). **Plan [010](active/010-row-and-button-ui.md).**
+- Make the whole row clickable to open the edit modal. **Plan [010](active/010-row-and-button-ui.md).**
 
-## Feature ideas (not confirmed, mine, none of these are agreed yet)
+## Feature ideas
 
-- Undo the last turn or the last change in general (outside of HP).
-- Initiative roll helper (roll a d20 plus modifier for selected participants).
-- Reorder a tied initiative by drag and drop.
-- Conditions or notes per participant (stunned, concentrating, and so on).
+- Undo the last turn or the last change in general. **Replaced** by "give the move back to the previous character": **Plan [015](active/015-previous-turn.md)**. HP mistakes are covered by the HP log (plan 005).
+- Initiative roll helper, for allies and enemies rolled by the DM, with an initiative bonus field. **Plan [016](active/016-initiative-bonus-and-roll.md).**
+- Reorder a tied initiative by drag and drop. **Dropped:** edit the initiative instead (decimals are allowed).
+- Conditions or notes per participant. **Dropped:** the app is a small offline helper for games at a table, not a full virtual tabletop.
