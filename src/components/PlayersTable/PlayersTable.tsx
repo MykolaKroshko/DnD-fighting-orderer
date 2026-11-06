@@ -6,6 +6,7 @@ interface IPlayerProps {
   details: IGameDetails;
   onEdit?: (player: IPlayer) => void;
   onDelete?: (player: IPlayer) => void;
+  onOpenHp?: (player: IPlayer) => void;
   onRequestToggleUserPaused: (player: IPlayer) => void;
 }
 
@@ -13,6 +14,7 @@ export function PlayersTable({
   details,
   onEdit,
   onDelete,
+  onOpenHp,
   onRequestToggleUserPaused,
 }: IPlayerProps): React.ReactElement {
   const players = useMemo(() => {
@@ -31,6 +33,7 @@ export function PlayersTable({
       <thead>
         <tr>
           <th>Name</th>
+          <th>HP</th>
           <th>Initiative</th>
           <th>Dex</th>
           <th>Order</th>
@@ -44,6 +47,7 @@ export function PlayersTable({
             player={player}
             onDelete={onDelete}
             onEdit={onEdit}
+            onOpenHp={onOpenHp}
             onTogglePause={onRequestToggleUserPaused}
             isCurrentPlayer={details.currentPlayerId === player.id}
             isCombatStage={details.status === GameStatus.Combat}

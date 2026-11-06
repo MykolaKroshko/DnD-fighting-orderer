@@ -23,6 +23,8 @@ const player = (overrides: Partial<IPlayer> = {}): IPlayer => ({
   status: PlayerStatus.Active,
   initiative: 10,
   dex: null,
+  maxHp: 1,
+  hp: 1,
   order: undefined,
   ...overrides,
 });

@@ -63,10 +63,55 @@ describe('AddPlayerModal', () => {
       name: 'Orc',
       initiative: -2.5,
       dex: 14,
+      maxHp: 1,
+      hp: 1,
       type: PlayerType.Enemy,
       status: PlayerStatus.Active,
       order: undefined,
     });
+  });
+
+  it('has Max HP before Current HP, both defaulting to 1', () => {
+    setup();
+    const labels = screen.getAllByText(/HP$/).map((el) => el.textContent);
+    expect(labels).toEqual(['Max HP', 'Current HP']);
+    expect(screen.getByLabelText('Max HP')).toHaveValue(1);
+    expect(screen.getByLabelText('Current HP')).toHaveValue(1);
+  });
+
+  it('fills Current HP from Max HP until Current HP is edited', async () => {
+    const { user, onConfirmModal } = setup();
+    await user.clear(screen.getByLabelText('Max HP'));
+    await user.type(screen.getByLabelText('Max HP'), '20');
+    expect(screen.getByLabelText('Current HP')).toHaveValue(20);
+
+    await user.clear(screen.getByLabelText('Current HP'));
+    await user.type(screen.getByLabelText('Current HP'), '7');
+    await user.clear(screen.getByLabelText('Max HP'));
+    await user.type(screen.getByLabelText('Max HP'), '30');
+    expect(screen.getByLabelText('Current HP')).toHaveValue(7);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onConfirmModal).toHaveBeenCalledWith(expect.objectContaining({ maxHp: 30, hp: 7 }));
+  });
+
+  it('uses Max HP when Current HP is left blank after editing', async () => {
+    const { user, onConfirmModal } = setup();
+    await user.clear(screen.getByLabelText('Max HP'));
+    await user.type(screen.getByLabelText('Max HP'), '12');
+    await user.clear(screen.getByLabelText('Current HP'));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onConfirmModal).toHaveBeenCalledWith(expect.objectContaining({ maxHp: 12, hp: 12 }));
+  });
+
+  it('caps Current HP at Max HP and turns a blank or invalid Max HP into 1', async () => {
+    const { user, onConfirmModal } = setup();
+    await user.clear(screen.getByLabelText('Max HP'));
+    await user.type(screen.getByLabelText('Max HP'), '5');
+    await user.clear(screen.getByLabelText('Current HP'));
+    await user.type(screen.getByLabelText('Current HP'), '9');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onConfirmModal).toHaveBeenLastCalledWith(expect.objectContaining({ maxHp: 5, hp: 5 }));
   });
 
   it('turns empty numbers into null', async () => {

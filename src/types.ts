@@ -22,6 +22,8 @@ export enum PlayerStatus {
 export interface IPlayer {
   id: string;
   dex: number | null;
+  maxHp: number;
+  hp: number;
   initiative: number | null;
   name: string;
   order: number | undefined;

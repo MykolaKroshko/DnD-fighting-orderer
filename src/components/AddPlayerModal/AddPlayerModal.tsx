@@ -29,12 +29,18 @@ function AddPlayerForm({
   const config = playerType === null ? undefined : MODAL_CONFIG[playerType];
   const isOpen = playerType !== null;
   const [name, setName] = React.useState<string>(config?.defaultName ?? '');
+  const [maxHp, setMaxHp] = React.useState<string>('1');
+  const [hp, setHp] = React.useState<string>('');
+  const [hpTouched, setHpTouched] = React.useState<boolean>(false);
   const [dex, setDex] = React.useState<string>('');
   const [initiative, setInitiative] = React.useState<string>('');
   const nameRef = useRef<HTMLInputElement>(null);
 
   const resetForm = (): void => {
     setName(config?.defaultName ?? '');
+    setMaxHp('1');
+    setHp('');
+    setHpTouched(false);
     setDex('');
     setInitiative('');
   };
@@ -51,8 +57,13 @@ function AddPlayerForm({
       return;
     }
 
+    const parsedMaxHp = Math.max(1, parseNumberInput(maxHp, { integer: true }) ?? 1);
+    const parsedHp = hpTouched ? (parseNumberInput(hp, { integer: true }) ?? parsedMaxHp) : parsedMaxHp;
+
     onConfirmModalAction({
       name,
+      maxHp: parsedMaxHp,
+      hp: Math.min(Math.max(parsedHp, 0), parsedMaxHp),
       dex: parseNumberInput(dex, { integer: true }),
       initiative: parseNumberInput(initiative, { integer: false }),
       type: playerType,
@@ -90,6 +101,33 @@ function AddPlayerForm({
           value={name}
           onInput={(e: FormEvent<HTMLInputElement>) => {
             setName(e.currentTarget.value);
+          }}
+          onKeyPress={onEnter}
+        />
+        <Input
+          name="maxHp"
+          label="Max HP"
+          type="number"
+          step="1"
+          min="1"
+          inputMode="numeric"
+          value={maxHp}
+          onInput={(e: FormEvent<HTMLInputElement>) => {
+            setMaxHp(e.currentTarget.value);
+          }}
+          onKeyPress={onEnter}
+        />
+        <Input
+          name="hp"
+          label="Current HP"
+          type="number"
+          step="1"
+          min="0"
+          inputMode="numeric"
+          value={hpTouched ? hp : maxHp}
+          onInput={(e: FormEvent<HTMLInputElement>) => {
+            setHpTouched(true);
+            setHp(e.currentTarget.value);
           }}
           onKeyPress={onEnter}
         />

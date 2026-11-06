@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import React from 'react';
 import { toast } from 'react-toastify';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
+import { HpModal } from '@/components/HpModal/HpModal';
 import { Modal } from '@/components/Modal/Modal';
 import { PlayersTable } from '@/components/PlayersTable/PlayersTable';
 import { GameStatus, type IGameDetails, type IPlayer, PlayerStatus } from '@/types';
@@ -28,6 +29,7 @@ enum ModalsStatus {
 export function CombatStage({ details, updateGameDetails }: ICombatStageProps): React.ReactElement {
   const [modalsStatus, setModalsStatus] = React.useState<ModalsStatus>(ModalsStatus.None);
   const [currentPlayer, setCurrentPlayer] = React.useState<IPlayer | null>(null);
+  const [hpPlayerId, setHpPlayerId] = React.useState<string | null>(null);
   const nextTurnBlockReason = getNextTurnBlockReason(details);
 
   function onCloseModal(): void {
@@ -98,7 +100,21 @@ export function CombatStage({ details, updateGameDetails }: ICombatStageProps): 
           Finish Combat
         </button>
       </div>
-      <PlayersTable details={details} onRequestToggleUserPaused={onRequestToggleUserPaused} />
+      <PlayersTable
+        details={details}
+        onOpenHp={(player) => {
+          setHpPlayerId(player.id);
+        }}
+        onRequestToggleUserPaused={onRequestToggleUserPaused}
+      />
+      <HpModal
+        playerId={hpPlayerId}
+        details={details}
+        onUpdate={updateGameDetails}
+        onClose={() => {
+          setHpPlayerId(null);
+        }}
+      />
       <Modal
         isOpen={modalsStatus === ModalsStatus.ConfirmFinishCombat}
         title="Finish combat?"

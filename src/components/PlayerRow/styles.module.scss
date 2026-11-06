@@ -25,6 +25,17 @@
   }
 }
 
+.down td {
+  text-decoration: line-through;
+  text-decoration-color: rgba(black, 0.5);
+}
+
+.down .hp_btn {
+  font-weight: bold;
+  color: darkred;
+  text-decoration: none;
+}
+
 .current td {
   border-block-start: 3px solid darkorchid;
   border-block-end: 3px solid darkorchid;

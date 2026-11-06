@@ -207,7 +207,7 @@ describe('App', () => {
       expect(screen.getByText('Stage: Combat, Round: 2')).toBeInTheDocument();
 
       const heroRow = screen.getByRole('cell', { name: 'Hero' }).closest('tr') as HTMLElement;
-      await user.click(within(heroRow).getByRole('button'));
+      await user.click(within(heroRow).getAllByRole('button').at(-1) as HTMLElement);
       expect(getGameDetails('g1').players[0].status).toBe(PlayerStatus.Paused);
 
       await user.click(screen.getByRole('button', { name: 'Finish Combat' }));

@@ -47,6 +47,10 @@ const parsePlayer = (value: unknown): IPlayer | null => {
     return null;
   }
 
+  const maxHp = typeof value.maxHp === 'number' && Number.isInteger(value.maxHp) && value.maxHp >= 1 ? value.maxHp : 1;
+  const hp =
+    typeof value.hp === 'number' && Number.isInteger(value.hp) && value.hp >= 0 ? Math.min(value.hp, maxHp) : maxHp;
+
   return {
     id: value.id,
     name: value.name,
@@ -54,6 +58,8 @@ const parsePlayer = (value: unknown): IPlayer | null => {
     status: value.status,
     initiative: toNumberOrNull(value.initiative),
     dex: toNumberOrNull(value.dex),
+    maxHp,
+    hp,
     order: toNumberOrNull(value.order) ?? undefined,
   };
 };

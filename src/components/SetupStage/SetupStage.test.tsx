@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { type BoundFunctions, type queries, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { toast } from 'react-toastify';
 import { SetupStage } from '@/components/SetupStage/SetupStage';
@@ -48,9 +48,33 @@ describe('SetupStage', () => {
       ).toEqual(['Hero', 'Buddy', 'Orc']);
     });
 
-    it('offers pause and delete for every participant', () => {
+    it('offers HP, pause and delete for every participant', () => {
       setup(makeDetails({ players: [makePlayer({ name: 'Hero' })] }));
-      expect(within(rowOf('Hero')).getAllByRole('button')).toHaveLength(2);
+      expect(within(rowOf('Hero')).getAllByRole('button')).toHaveLength(3);
+    });
+  });
+
+  describe('hit points', () => {
+    const heroDetails = (): IGameDetails => makeDetails({ players: [makePlayer({ name: 'Hero', maxHp: 20, hp: 12 })] });
+    const openHpModal = async (user: ReturnType<typeof userEvent.setup>): Promise<BoundFunctions<typeof queries>> => {
+      await user.click(within(rowOf('Hero')).getByRole('button', { name: '12/20' }));
+      return within(getModal(screen.getByRole('heading', { name: 'Hero: 12/20 HP' })));
+    };
+
+    it('opens the HP modal from the HP cell', async () => {
+      const { user } = setup(heroDetails());
+      const modal = await openHpModal(user);
+      expect(modal.getByLabelText('Amount')).toBeInTheDocument();
+    });
+
+    it('damages the participant and closes the modal', async () => {
+      const { user, lastUpdate } = setup(heroDetails());
+      const modal = await openHpModal(user);
+      expect(document.querySelector('.open')).not.toBeNull();
+      await user.type(modal.getByLabelText('Amount'), '5');
+      await user.click(modal.getAllByRole('button', { name: 'Damage' })[0]);
+      expect(lastUpdate().players[0].hp).toBe(7);
+      expect(document.querySelector('.open')).toBeNull();
     });
   });
 
@@ -194,7 +218,7 @@ describe('SetupStage', () => {
     it('toggles the status and stays in setup', async () => {
       const hero = makePlayer({ name: 'Hero', initiative: null });
       const { user, lastUpdate } = setup(makeDetails({ players: [hero] }));
-      await user.click(within(rowOf('Hero')).getAllByRole('button')[0]);
+      await user.click(within(rowOf('Hero')).getAllByRole('button')[1]);
 
       const result = lastUpdate();
       expect(result.status).toBe(GameStatus.Setup);
@@ -220,7 +244,7 @@ describe('SetupStage', () => {
       const hero = makePlayer({ name: 'Hero' });
       const other = makePlayer({ name: 'Other' });
       const { user, lastUpdate, updateGameDetails } = setup(makeDetails({ players: [hero, other] }));
-      await user.click(within(rowOf('Hero')).getAllByRole('button')[1]);
+      await user.click(within(rowOf('Hero')).getAllByRole('button')[2]);
       expect(updateGameDetails).not.toHaveBeenCalled();
 
       const modal = within(getModal(screen.getByText('Are you sure you want to delete Hero?')));
@@ -236,7 +260,7 @@ describe('SetupStage', () => {
 
     it('keeps the participant on Cancel', async () => {
       const { user, updateGameDetails } = setup(makeDetails({ players: [makePlayer({ name: 'Hero' })] }));
-      await user.click(within(rowOf('Hero')).getAllByRole('button')[1]);
+      await user.click(within(rowOf('Hero')).getAllByRole('button')[2]);
       const modal = within(getModal(screen.getByText('Are you sure you want to delete Hero?')));
       await user.click(modal.getByRole('button', { name: 'Cancel' }));
 
@@ -285,6 +309,47 @@ describe('SetupStage', () => {
       await user.click(modal.getByRole('button', { name: 'Save' }));
 
       expect(lastUpdate().players[0].initiative).toBeNull();
+    });
+
+    it('edits Max HP and Current HP, prefilled, with Max HP first', async () => {
+      const { user, lastUpdate } = setup(makeDetails({ players: [makePlayer({ name: 'Hero', maxHp: 20, hp: 12 })] }));
+      await user.click(screen.getByRole('cell', { name: 'Hero' }));
+
+      const modal = within(getModal(screen.getByRole('heading', { name: /^Change Hero/ })));
+      const labels = modal.getAllByText(/HP$/).map((el) => el.textContent);
+      expect(labels).toEqual(['Max HP', 'Current HP']);
+      expect(modal.getByLabelText('Max HP')).toHaveValue(20);
+      expect(modal.getByLabelText('Current HP')).toHaveValue(12);
+
+      await user.clear(modal.getByLabelText('Max HP'));
+      await user.type(modal.getByLabelText('Max HP'), '30');
+      await user.clear(modal.getByLabelText('Current HP'));
+      await user.type(modal.getByLabelText('Current HP'), '25');
+      await user.click(modal.getByRole('button', { name: 'Save' }));
+
+      expect(lastUpdate().players[0]).toMatchObject({ maxHp: 30, hp: 25 });
+    });
+
+    it('does not fill Current HP from Max HP while editing', async () => {
+      const { user } = setup(makeDetails({ players: [makePlayer({ name: 'Hero', maxHp: 20, hp: 12 })] }));
+      await user.click(screen.getByRole('cell', { name: 'Hero' }));
+
+      const modal = within(getModal(screen.getByRole('heading', { name: /^Change Hero/ })));
+      await user.clear(modal.getByLabelText('Max HP'));
+      await user.type(modal.getByLabelText('Max HP'), '30');
+      expect(modal.getByLabelText('Current HP')).toHaveValue(12);
+    });
+
+    it('caps Current HP at Max HP on save', async () => {
+      const { user, lastUpdate } = setup(makeDetails({ players: [makePlayer({ name: 'Hero', maxHp: 20, hp: 12 })] }));
+      await user.click(screen.getByRole('cell', { name: 'Hero' }));
+
+      const modal = within(getModal(screen.getByRole('heading', { name: /^Change Hero/ })));
+      await user.clear(modal.getByLabelText('Max HP'));
+      await user.type(modal.getByLabelText('Max HP'), '8');
+      await user.click(modal.getByRole('button', { name: 'Save' }));
+
+      expect(lastUpdate().players[0]).toMatchObject({ maxHp: 8, hp: 8 });
     });
 
     it('does not save on Cancel', async () => {

@@ -4,6 +4,7 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import { AddPlayerModal } from '@/components/AddPlayerModal/AddPlayerModal';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
+import { HpModal } from '@/components/HpModal/HpModal';
 import { Modal } from '@/components/Modal/Modal';
 import { PlayersTable } from '@/components/PlayersTable/PlayersTable';
 import { type IGameDetails, type IPlayer, PlayerType } from '@/types';
@@ -39,6 +40,7 @@ const ADD_MODAL_PLAYER_TYPE: Partial<Record<ModalsStatus, PlayerType>> = {
 export function SetupStage({ details, updateGameDetails }: ISetupStageProps): React.ReactElement {
   const [modalsStatus, setModalsStatus] = React.useState<ModalsStatus>(ModalsStatus.None);
   const [currentPlayer, setCurrentPlayer] = React.useState<IPlayer | null>(null);
+  const [hpPlayerId, setHpPlayerId] = React.useState<string | null>(null);
 
   function onCloseModal(): void {
     setModalsStatus(ModalsStatus.None);
@@ -134,7 +136,18 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
           setCurrentPlayer(player);
           setModalsStatus(ModalsStatus.DeletePlayer);
         }}
+        onOpenHp={(player) => {
+          setHpPlayerId(player.id);
+        }}
         onRequestToggleUserPaused={onRequestToggleUserPaused}
+      />
+      <HpModal
+        playerId={hpPlayerId}
+        details={details}
+        onUpdate={updateGameDetails}
+        onClose={() => {
+          setHpPlayerId(null);
+        }}
       />
       <AddPlayerModal
         playerType={ADD_MODAL_PLAYER_TYPE[modalsStatus] ?? null}

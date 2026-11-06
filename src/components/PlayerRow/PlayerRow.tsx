@@ -4,6 +4,7 @@ import React from 'react';
 import DeleteIcon from '@/assets/icons/delete.svg?react';
 import FightIcon from '@/assets/icons/fight.svg?react';
 import PauseIcon from '@/assets/icons/pause.svg?react';
+import { getMaxHp } from '@/hp';
 import { type IPlayer, PlayerStatus, PlayerType } from '@/types';
 import { getPlayerName } from '@/utils';
 
@@ -12,6 +13,7 @@ interface IPlayerProps {
   onDelete?: (player: IPlayer) => void;
   onTogglePause: (player: IPlayer) => void;
   onEdit?: (player: IPlayer) => void;
+  onOpenHp?: (player: IPlayer) => void;
   isCurrentPlayer?: boolean;
   isCombatStage?: boolean;
 }
@@ -21,6 +23,7 @@ export function PlayerRow({
   onDelete,
   onTogglePause,
   onEdit,
+  onOpenHp,
   isCurrentPlayer,
   isCombatStage,
 }: IPlayerProps): React.ReactElement {
@@ -31,6 +34,7 @@ export function PlayerRow({
         [styles.ally]: player.type === PlayerType.Ally,
         [styles.enemy]: player.type === PlayerType.Enemy,
         [styles.paused]: player.status === PlayerStatus.Paused,
+        [styles.down]: player.hp === 0,
         [styles.current]: isCurrentPlayer,
       })}
     >
@@ -40,6 +44,18 @@ export function PlayerRow({
         }}
       >
         {getPlayerName(player.name)}
+      </td>
+      <td>
+        <button
+          type="button"
+          className={clsx('btn', styles.hp_btn)}
+          onClick={(e) => {
+            onOpenHp?.(player);
+            e.stopPropagation();
+          }}
+        >
+          {`${player.hp}/${getMaxHp(player)}`}
+        </button>
       </td>
       <td>{player.initiative ?? '--'}</td>
       <td>{player.dex ?? '--'}</td>

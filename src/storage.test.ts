@@ -12,6 +12,8 @@ const storedPlayer = {
   status: PlayerStatus.Active,
   initiative: 12.5,
   dex: 3,
+  maxHp: 20,
+  hp: 12,
   order: 1,
 };
 
@@ -154,6 +156,36 @@ describe('game details validation', () => {
     const loaded = getGameDetails('g1');
     expect(loaded.players[0].order).toBeUndefined();
     expect(loaded.allies[0].order).toBeUndefined();
+  });
+
+  it('loads participants saved without HP as 1/1', () => {
+    const old: Record<string, unknown> = { ...storedPlayer };
+    delete old.maxHp;
+    delete old.hp;
+    store('g1', { ...empty('g1'), players: [old] });
+    const [loaded] = getGameDetails('g1').players;
+    expect(loaded.maxHp).toBe(1);
+    expect(loaded.hp).toBe(1);
+  });
+
+  it.each([
+    ['a decimal maximum', { maxHp: 2.5, hp: 2 }, { maxHp: 1, hp: 1 }],
+    ['a zero maximum', { maxHp: 0, hp: 0 }, { maxHp: 1, hp: 0 }],
+    ['a negative maximum', { maxHp: -4, hp: 3 }, { maxHp: 1, hp: 1 }],
+    ['a string maximum', { maxHp: '20', hp: 5 }, { maxHp: 1, hp: 1 }],
+    ['a negative hp', { maxHp: 20, hp: -1 }, { maxHp: 20, hp: 20 }],
+    ['a decimal hp', { maxHp: 20, hp: 1.5 }, { maxHp: 20, hp: 20 }],
+    ['an hp above the maximum', { maxHp: 20, hp: 30 }, { maxHp: 20, hp: 20 }],
+  ])('falls back for %s', (_label, stored, expected) => {
+    store('g1', { ...empty('g1'), enemies: [{ ...storedPlayer, ...stored }] });
+    const [loaded] = getGameDetails('g1').enemies;
+    expect({ maxHp: loaded.maxHp, hp: loaded.hp }).toEqual(expected);
+  });
+
+  it('keeps valid HP, including 0', () => {
+    store('g1', { ...empty('g1'), allies: [{ ...storedPlayer, maxHp: 8, hp: 0 }] });
+    const [loaded] = getGameDetails('g1').allies;
+    expect({ maxHp: loaded.maxHp, hp: loaded.hp }).toEqual({ maxHp: 8, hp: 0 });
   });
 
   it('keeps games independent of each other', () => {

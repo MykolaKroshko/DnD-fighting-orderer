@@ -31,6 +31,9 @@ const rowOf = (name: string): HTMLElement => {
   return row;
 };
 
+/** The pause button is the last button of a row in combat (the HP button comes first, there is no delete). */
+const pauseButtonOf = (name: string): HTMLElement => within(rowOf(name)).getAllByRole('button').at(-1) as HTMLElement;
+
 const combat = (): { details: IGameDetails; a: IPlayer; b: IPlayer; c: IPlayer } => {
   const a = makePlayer({ name: 'A', initiative: 30 });
   const b = makePlayer({ name: 'B', initiative: 20 });
@@ -49,19 +52,19 @@ describe('CombatStage', () => {
           within(r)
             .getAllByRole('cell')
             .map((c) => c.textContent)
-            .slice(0, 4)
+            .slice(0, 5)
         )
       ).toEqual([
-        ['A', '30', '--', '1'],
-        ['B', '20', '--', '2'],
-        ['C', '10', '--', '3'],
+        ['A', '1/1', '30', '--', '1'],
+        ['B', '1/1', '20', '--', '2'],
+        ['C', '1/1', '10', '--', '3'],
       ]);
     });
 
-    it('offers only the pause button, no delete', () => {
+    it('offers only the HP and pause buttons, no delete', () => {
       const { details } = combat();
       setup(details);
-      expect(within(rowOf('A')).getAllByRole('button')).toHaveLength(1);
+      expect(within(rowOf('A')).getAllByRole('button')).toHaveLength(2);
     });
   });
 
@@ -141,11 +144,41 @@ describe('CombatStage', () => {
     });
   });
 
+  describe('hit points', () => {
+    it('opens the HP modal from the HP cell and applies healing', async () => {
+      const hurt = makePlayer({ name: 'Hurt', initiative: 5, maxHp: 20, hp: 10 });
+      const { user, lastUpdate } = setup(updatePlayersOrder(makeDetails({ players: [hurt] })));
+      await user.click(within(rowOf('Hurt')).getByRole('button', { name: '10/20' }));
+
+      const modal = within(getModal(screen.getByRole('heading', { name: 'Hurt: 10/20 HP' })));
+      await user.type(modal.getByLabelText('Amount'), '4');
+      await user.click(modal.getByRole('button', { name: 'Heal' }));
+      expect(lastUpdate().players[0].hp).toBe(14);
+    });
+
+    it('keeps HP of players and allies, and removes enemies, on Finish Combat', async () => {
+      const hero = makePlayer({ name: 'Hero', initiative: 9, maxHp: 20, hp: 3 });
+      const ally = makePlayer({ name: 'Ally', type: PlayerType.Ally, initiative: 8, maxHp: 15, hp: 0 });
+      const orc = makePlayer({ name: 'Orc', type: PlayerType.Enemy, initiative: 7, maxHp: 9, hp: 9 });
+      const { user, lastUpdate } = setup(
+        updatePlayersOrder(makeDetails({ players: [hero], allies: [ally], enemies: [orc] }))
+      );
+      await user.click(screen.getByRole('button', { name: 'Finish Combat' }));
+      const modal = within(getModal(screen.getByRole('heading', { name: 'Finish combat?' })));
+      await user.click(modal.getByRole('button', { name: 'Finish' }));
+
+      const result = lastUpdate();
+      expect(result.players[0]).toMatchObject({ maxHp: 20, hp: 3 });
+      expect(result.allies[0]).toMatchObject({ maxHp: 15, hp: 0 });
+      expect(result.enemies).toEqual([]);
+    });
+  });
+
   describe('pausing', () => {
     it('pauses the current participant and passes the turn on', async () => {
       const { details, a, b } = combat();
       const { user, lastUpdate } = setup(details);
-      await user.click(within(rowOf('A')).getByRole('button'));
+      await user.click(pauseButtonOf('A'));
 
       const result = lastUpdate();
       expect(result.players.find((p) => p.id === a.id)?.status).toBe(PlayerStatus.Paused);
@@ -156,7 +189,7 @@ describe('CombatStage', () => {
       const { details, b } = combat();
       const paused = makePlayer({ name: 'Napper', initiative: 25, status: PlayerStatus.Paused });
       const { user, lastUpdate } = setup(updatePlayersOrder({ ...details, players: [...details.players, paused] }));
-      await user.click(within(rowOf('Napper')).getByRole('button'));
+      await user.click(pauseButtonOf('Napper'));
 
       const result = lastUpdate();
       const napper = result.players.find((p) => p.id === paused.id);
@@ -171,7 +204,7 @@ describe('CombatStage', () => {
       const { user, lastUpdate, updateGameDetails } = setup(
         updatePlayersOrder({ ...details, players: [...details.players, late] })
       );
-      await user.click(within(rowOf('Late')).getByRole('button'));
+      await user.click(pauseButtonOf('Late'));
       expect(updateGameDetails).not.toHaveBeenCalled();
 
       const modal = within(getModal(screen.getByRole('heading', { name: /^Change Late/ })));
@@ -190,7 +223,7 @@ describe('CombatStage', () => {
       const { user, updateGameDetails } = setup(
         updatePlayersOrder({ ...details, players: [...details.players, late] })
       );
-      await user.click(within(rowOf('Late')).getByRole('button'));
+      await user.click(pauseButtonOf('Late'));
       const modal = within(getModal(screen.getByRole('heading', { name: /^Change Late/ })));
       await user.click(modal.getByRole('button', { name: 'Cancel' }));
 
