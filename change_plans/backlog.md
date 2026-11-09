@@ -47,6 +47,20 @@ HP tracking is the base for the hit point features, so plan 002 comes first for 
 - Bulk add enemies and ally NPCs, with auto numbering and no shared initiative. **Plan [008](active/008-clone-and-bulk-add.md).**
 - Export and import a game as a file. **Plan [009](active/009-export-import.md).**
 
+### Monsters and encounters
+All **Open**, no plans yet. The library is the base: custom monsters, saved battles and on-the-fly add all read from it.
+- Library of monsters with filters by source and type, and a search by name. **Open.**
+- Add custom monsters to the library for easy re-use. **Open.**
+- Add monsters from the library to an ongoing battle on the fly. **Open.**
+- Pre-build battles: configure the monsters of an encounter ahead of time and save it for later. **Open.**
+- **Decided with the owner:**
+  - Data: monsters are exported from 5etools with whole stat blocks and bundled with the app (offline). The builder prefills table values (name, HP, initiative bonus and so on) from the stat block; the rest of the stat block shows as extra info when the monster name is clicked.
+  - Filters: **source** is the book title; **type** is the book's relation to the core rules (core, extension, partnered, third-party and so on). Custom monsters get their own source.
+  - Library: a static JSON file, no separate runtime model. Adding a monster to a battle copies its values from the JSON into a new `IPlayer`; there is no link back to the library entry afterwards.
+  - Custom monsters: kept in local storage (explicit parser in `src/storage.ts`), merged with the static library in the UI, and the custom library can be exported as a file. Import of such a file is the natural counterpart; confirm when planning.
+  - Saved battles: a separate list in local storage, independent of the game save.
+- To settle when planning: licensing of the bundled 5etools data (it goes beyond the SRD, so check what may be shipped); bundle size and lazy loading of the data; and whether saved battles also get exported, and whether the custom library export reuses the file format of plan 009.
+
 ### UI
 - Labels on buttons (visible on wide screens, `aria-label`s everywhere). **Plan [010](active/010-row-and-button-ui.md).**
 - Make the whole row clickable to open the edit modal. **Plan [010](active/010-row-and-button-ui.md).**
