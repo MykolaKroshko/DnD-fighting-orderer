@@ -2,7 +2,7 @@
 
 Plans written from `change_plans/backlog.md` after a decision interview with the owner. Each plan says what to build, how to build it, how to test it and when it counts as done.
 
-Every plan can be implemented on its own and in any order, with one exception: the hit point plans (003 to 007) need 002 first. Where two plans touch the same code, both name the other under "Integration", so whichever lands second knows what to wire up.
+Every plan can be implemented on its own and in any order, with two exceptions: the hit point plans (003 to 007) need 002 first, and the monster library plans (017 to 021) follow the "Needs" column of the index (017, then 018, 019, 020 and 021). Plans 003 to 016 only use the parsers in `src/storage.ts`, so they can land before or after 017. Where two plans touch the same code, both name the other under "Integration", so whichever lands second knows what to wire up.
 
 ## Index
 
@@ -23,6 +23,11 @@ Every plan can be implemented on its own and in any order, with one exception: t
 | [014](014-id-fallback.md) | Id generator that works over plain HTTP | - |
 | [015](015-previous-turn.md) | "Previous Player" button | - |
 | [016](016-initiative-bonus-and-roll.md) | Initiative bonus field and initiative rolls for NPCs | - |
+| [017](017-indexeddb-storage.md) | IndexedDB storage layer, one-time copy of existing games | - |
+| [018](018-monster-library.md) | Monster library: bundled 5etools data, browsing modal, filters, stat blocks, add in Setup | 017, 008 |
+| [019](019-add-from-library-to-game.md) | Library link on participants, text HP, Combat additions, stat block in the edit modal | 018 |
+| [020](020-custom-monsters.md) | Monsters page, custom monsters, save and update from a participant, export and import | 018, 019, 008 |
+| [021](021-saved-battles.md) | Battles page, saved battles, Load battle into a game, export and import | 018, 019, 020, 008 |
 
 ## Decisions that apply to several plans
 
@@ -67,6 +72,13 @@ Clicking the cell opens the HP modal. The death save buttons are separate button
 - HP rules are pure functions in a new `src/hp.ts` (created by 002). Each takes `IGameDetails` and returns a new `IGameDetails`. Components never change HP fields themselves.
 - `src/storage.ts` has an explicit parser for every field. A plan that adds a field also adds it to `parsePlayer` or `parseGameDetails` with a safe default, because anything the parser does not list is dropped on load. Export (009) uses the same parsers, so new fields reach export files automatically.
 - `src/testUtils.ts` (`makePlayer`, `makeDetails`) gets the new fields with neutral defaults. `src/utils.test.ts` has its own `player()` helper that needs the same.
+
+**Monster library (plans 017 to 021).**
+- Storage moves from `localStorage` to IndexedDB (017). The parsers in `src/storage.ts` stay the single place where stored data is validated; only reading and writing become async.
+- Two optional fields on `IPlayer` (019): `monsterId` (`"<source>:<name>"` for a library monster, `custom:<id>` for a custom one) and `hpNote` (the text of a formula HP, shown in the HP cell until the DM sets a number). Adding a monster copies its values; nothing is ever synced back to the library.
+- The static data (`src/data/monsters.json`, `books.json`) is bundled, loaded with a dynamic `import()` and written to IndexedDB the first time the library opens. Its licence is the owner's responsibility.
+- Three pages: Games, Monsters (020) and Battles (021). A modal never opens another modal: the library modal only picks, editing happens in the edit modal after adding.
+- The row actions live in a kebab menu (008). The app is used mostly on phones and tablets, so menus are bottom sheets below 768px and tap targets are at least 44px.
 
 **Interactive elements in a row** are real `<button>` elements. Plan 010 relies on this for the clickable row.
 

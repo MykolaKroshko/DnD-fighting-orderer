@@ -31,6 +31,8 @@ Open assumption: the confirmation also appears for *positive* bonuses, because t
 ## Integration
 - 003, 004, 007: each adds its own step to `longRest` when it lands. Without them the long rest is just "heal to maximum".
 - 005: a game-wide long rest is one log entry with one `changes` item per affected participant.
+- 008: the row actions become a kebab menu. The per-participant **Long rest** also becomes a menu item there (Setup only), next to the button in the HP modal; the item runs the same confirmation.
+- 019: a participant that still has an `hpNote` (text HP) is skipped by Long rest, like it is by Restore.
 
 ## Tests
 - `hp.test.ts`: heals to the base maximum after removing a bonus, clears temp HP and death saves, skips dead characters, works for one participant and for all, does nothing for an empty game, the warning list.

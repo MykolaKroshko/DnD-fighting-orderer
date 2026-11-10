@@ -19,6 +19,7 @@ Legend: **Plan 0xx** = written up and ready to implement. **Done** = already in 
 - Component tests (React Testing Library). **Done.** `Modal`, `PlayerRow`, `AddPlayerModal`, `SetupStage`, `CombatStage` and an `App` integration test exist.
 - Fix the `set-state-in-effect` lint warnings. `AddPlayerModal` and `MainPage` are **done**; `EditPlayerModal` and `AppLayout` remain. **Plan [012](active/012-react-and-lint-cleanup.md).**
 - React 19 cleanups the lint config silences (`<Context>` as a provider, `use(Context)`). **Plan [012](active/012-react-and-lint-cleanup.md).**
+- Move all storage from `localStorage` to IndexedDB (one-time copy of existing games, the old keys stay). **Plan [017](active/017-indexeddb-storage.md).**
 
 ### Tooling
 - Add `eslint-import-resolver-typescript` so `import-x/no-cycle` resolves the `@/` alias. **Done** (installed).
@@ -31,7 +32,7 @@ Legend: **Plan 0xx** = written up and ready to implement. **Done** = already in 
 
 ## Features (from the owner)
 
-HP tracking is the base for the hit point features, so plan 002 comes first for plans 003 to 007. All the other plans are independent.
+HP tracking is the base for the hit point features, so plan 002 comes first for plans 003 to 007. The monster library plans follow the order 017 to 021. All the other plans are independent.
 
 ### Hit points
 - HP tracking per participant (current and maximum), with damage, heal and restore to maximum. **Plan [002](active/002-hp-base.md).**
@@ -43,27 +44,23 @@ HP tracking is the base for the hit point features, so plan 002 comes first for 
 - Death saves tracker, players only, shown in the table at 0 HP. **Plan [007](active/007-death-saves.md).**
 
 ### Game and participants
-- Clone tokens. **Plan [008](active/008-clone-and-bulk-add.md).**
+- Clone tokens, from a kebab menu that also collects the other row actions. **Plan [008](active/008-clone-and-bulk-add.md).**
 - Bulk add enemies and ally NPCs, with auto numbering and no shared initiative. **Plan [008](active/008-clone-and-bulk-add.md).**
 - Export and import a game as a file. **Plan [009](active/009-export-import.md).**
 
 ### Monsters and encounters
-All **Open**, no plans yet. The library is the base: custom monsters, saved battles and on-the-fly add all read from it.
-- Library of monsters with filters by source and type, and a search by name. **Open.**
-- Add custom monsters to the library for easy re-use. **Open.**
-- Add monsters from the library to an ongoing battle on the fly. **Open.**
-- Pre-build battles: configure the monsters of an encounter ahead of time and save it for later. **Open.**
-- **Decided with the owner:**
-  - Data: monsters are exported from 5etools with whole stat blocks and bundled with the app (offline). The builder prefills table values (name, HP, initiative bonus and so on) from the stat block; the rest of the stat block shows as extra info when the monster name is clicked.
-  - Filters: **source** is the book title; **type** is the book's relation to the core rules (core, extension, partnered, third-party and so on). Custom monsters get their own source.
-  - Library: a static JSON file, no separate runtime model. Adding a monster to a battle copies its values from the JSON into a new `IPlayer`; there is no link back to the library entry afterwards.
-  - Custom monsters: kept in local storage (explicit parser in `src/storage.ts`), merged with the static library in the UI, and the custom library can be exported as a file. Import of such a file is the natural counterpart; confirm when planning.
-  - Saved battles: a separate list in local storage, independent of the game save.
-- To settle when planning: licensing of the bundled 5etools data (it goes beyond the SRD, so check what may be shipped); bundle size and lazy loading of the data; and whether saved battles also get exported, and whether the custom library export reuses the file format of plan 009.
+The 5etools data is already trimmed (tags, images, reprint and licence fields dropped, stat-less NPCs removed) and committed in `library/`. The decisions behind these plans were agreed with the owner and are written into the plans.
+- Library of monsters (bundled 5etools data, 7,451 monsters in 148 books) with filters by group and edition, a name search, a virtual-scrolled list and stat blocks; picked monsters are added to a game in Setup. **Plan [018](active/018-monster-library.md).**
+- Add library monsters to an ongoing battle on the fly (paused, blank initiative), keep a link to the library entry for the stat block, and handle monsters whose HP is a formula. **Plan [019](active/019-add-from-library-to-game.md).**
+- Custom monsters for easy re-use: a Monsters page, save and update from a participant (with a same-stats warning), a stat block template picker, export and import. **Plan [020](active/020-custom-monsters.md).**
+- Pre-build battles: a Battles page, saved battles, a Load battle button in a game, export and import. **Plan [021](active/021-saved-battles.md).**
+- Licence of the bundled data: it goes beyond the SRD, so publishing the app is the owner's responsibility. **Open** (the SRD flags were dropped from the data; restore them from the 5etools export to build an SRD-only subset).
+- Rolled HP for monsters, a structured stat block editor for custom monsters and a standalone library page. **Open, not planned.**
 
 ### UI
 - Labels on buttons (visible on wide screens, `aria-label`s everywhere). **Plan [010](active/010-row-and-button-ui.md).**
 - Make the whole row clickable to open the edit modal. **Plan [010](active/010-row-and-button-ui.md).**
+- Row actions in a kebab menu (bottom sheet on phones and tablets). **Plan [008](active/008-clone-and-bulk-add.md).**
 
 ## Feature ideas
 
