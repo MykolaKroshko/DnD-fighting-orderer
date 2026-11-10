@@ -2,6 +2,7 @@
 
 Plans written from `change_plans/backlog.md` after a decision interview with the owner. Each plan says what to build, how to build it, how to test it and when it counts as done.
 
+<<<<<<< Updated upstream
 Every plan can be implemented on its own and in any order, with two exceptions: the hit point plans (003 to 007) need 002 first, and the monster library plans (017 to 021) follow the "Needs" column of the index (017, then 018, 019, 020 and 021). Plans 003 to 016 only use the parsers in `src/storage.ts`, so they can land before or after 017. Where two plans touch the same code, both name the other under "Integration", so whichever lands second knows what to wire up.
 
 ## Index
@@ -28,6 +29,37 @@ Every plan can be implemented on its own and in any order, with two exceptions: 
 | [019](019-add-from-library-to-game.md) | Library link on participants, text HP, Combat additions, stat block in the edit modal | 018 |
 | [020](020-custom-monsters.md) | Monsters page, custom monsters, save and update from a participant, export and import | 018, 019, 008 |
 | [021](021-saved-battles.md) | Battles page, saved battles, Load battle into a game, export and import | 018, 019, 020, 008 |
+=======
+Every plan can be implemented on its own and in any order, with a few exceptions: the hit point plans (003 to 007) need 002 first, the quick HP panel (022) needs 002 and 005, and the monster library plans (017 to 021) follow the "Needs" column of the index (017, then 018, 019, 020 and 021). Plans 003 to 016 only use the parsers in `src/storage.ts`, so they can land before or after 017. Where two plans touch the same code, both name the other under "Integration", so whichever lands second knows what to wire up.
+
+## Index
+
+| # | Plan | Needs | Status |
+|---|------|-------|--------|
+| [002](002-hp-base.md) | HP base: current and max HP, HP cell and modal, damage, heal, restore | - | Done |
+| [003](003-temp-hp.md) | Temporary HP | 002 | Not started |
+| [004](004-max-hp-bonus.md) | Max HP bonus (positive or negative), permanent death at max 0 | 002 | Not started |
+| [005](005-hp-log.md) | HP change log with undo | 002 | Not started |
+| [006](006-long-rest.md) | Long rest, per game and per participant | 002 | Not started |
+| [007](007-death-saves.md) | Death saves tracker | 002 | Not started |
+| [008](008-clone-and-bulk-add.md) | Clone participant, bulk add, name sorting in Setup, row actions menu | - | Not started |
+| [009](009-export-import.md) | Export and import games as JSON files | - | Not started |
+| [010](010-row-and-button-ui.md) | Button labels, `aria-label`s, real name button, clickable row | - | Not started |
+| [011](011-dialog-modals.md) | Modals on native `<dialog>`, forms submit through `onSubmit` | - | Not started |
+| [012](012-react-and-lint-cleanup.md) | React 19 cleanups and the remaining `set-state-in-effect` warnings | - | In progress |
+| [013](013-tooling-cleanup.md) | Vite native tsconfig paths, browserslist refresh, `knip` | - | Not started |
+| [014](014-id-fallback.md) | Id generator that works over plain HTTP | - | Not started |
+| [015](015-previous-turn.md) | "Previous Player" button | - | Not started |
+| [016](016-initiative-bonus-and-roll.md) | Initiative bonus field and initiative rolls for NPCs | - | Not started |
+| [017](017-indexeddb-storage.md) | IndexedDB storage layer, one-time copy of existing games | - | Not started |
+| [018](018-monster-library.md) | Monster library: bundled 5etools data, browsing modal, filters, stat blocks, add in Setup | 017, 008 | Not started |
+| [019](019-add-from-library-to-game.md) | Library link on participants, text HP, Combat additions, stat block in the edit modal | 018 | Not started |
+| [020](020-custom-monsters.md) | Monsters page, custom monsters, save and update from a participant, export and import | 018, 019, 008 | Not started |
+| [021](021-saved-battles.md) | Battles page, saved battles, Load battle into a game, export and import | 018, 019, 020, 008 | Not started |
+| [022](022-quick-hp-panel.md) | Fixed HP panel in Combat: select a row, amount, Damage, Heal, Restore, Undo | 002, 005 | Not started |
+
+Status values: **Not started**, **In progress** (partly in the code), **Done** (in the code, listed here until its plan file moves to `finished/`). Update the column when a plan lands.
+>>>>>>> Stashed changes
 
 ## Decisions that apply to several plans
 

@@ -40,6 +40,7 @@ HP tracking is the base for the hit point features, so plan 002 comes first for 
 - Temporary change of the maximum HP, now the "Max HP bonus" (positive or negative; at 0 the character is permanently dead). **Plan [004](active/004-max-hp-bonus.md).**
 - HP change log with undo: one general log of 20 entries per game, cleared when combat starts. **Plan [005](active/005-hp-log.md).**
 - Quick heal and damage with an amount field, and restore to maximum in one click. **Plan [002](active/002-hp-base.md).**
+- Quick HP panel: a panel fixed to the top of the Combat screen that shows the current and maximum HP of the selected row (the row the DM tapped, not the row whose turn it is), with an amount input and Damage, Heal, Restore and Undo buttons for faster HP changes. **Plan [022](active/022-quick-hp-panel.md).**
 - Long rest button, per game and per participant, in Setup only. **Plan [006](active/006-long-rest.md).**
 - Death saves tracker, players only, shown in the table at 0 HP. **Plan [007](active/007-death-saves.md).**
 

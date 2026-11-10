@@ -14,7 +14,11 @@ A monster added from the library keeps a link to its entry, so the DM can read i
   - The HP modal disables Damage, Heal and Restore while the note exists and says "Set the HP in the edit dialog first".
   - **Start combat is blocked** while any participant has a note. The block reason lists their names ("Set the HP of: Beast of the Land, Aberrant Spirit").
   - A monster added mid-combat shows the text and cannot take damage or heal until the DM sets a number.
+<<<<<<< Updated upstream
 - **Name opens the edit modal in Combat** too. In Combat the modal shows the HP fields only while the participant still has an `hpNote`; otherwise HP changes only through the HP modal, as the README rules say. Saving from a name click does not unpause or reorder anyone.
+=======
+- **The name button opens the edit modal in Combat** too (the row itself is for selecting, plan 022). In Combat the modal shows the HP fields only while the participant still has an `hpNote`; otherwise HP changes only through the HP modal, as the README rules say. Saving from a name click does not unpause or reorder anyone.
+>>>>>>> Stashed changes
 
 ## Model
 - `IPlayer` gets two optional fields: `monsterId?: string` (`"<source>:<name>"`, or a custom id from plan 020) and `hpNote?: string`. Update `src/types.ts`, `parsePlayer` (a string, empty becomes `undefined`) and `createPlayer`. `makePlayer` in `testUtils.ts` needs nothing (both are optional).
@@ -35,7 +39,12 @@ A monster added from the library keeps a link to its entry, so the DM can read i
 ## Integration
 - 008: **Clone** copies `monsterId` and `hpNote`.
 - 009: both fields travel in export files through the parsers.
+<<<<<<< Updated upstream
 - 010: the name button and the clickable row now exist in Combat as well.
+=======
+- 010: the name button now exists in Combat as well. In Combat a row click selects the row for plan 022's quick HP panel instead of opening the edit modal; in Setup the row click still opens it.
+- 022: a participant with an `hpNote` shows a **Set HP** button in the quick HP panel that opens this edit modal.
+>>>>>>> Stashed changes
 - 006, 002: Long rest and Restore skip a participant with a note.
 - 020: the same link points to a custom monster when its id starts with `custom:`.
 
