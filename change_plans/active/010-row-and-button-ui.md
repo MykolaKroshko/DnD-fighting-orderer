@@ -25,11 +25,7 @@ Every button says what it does, both for sighted users and for screen readers, a
 - 002, 007, 016 add buttons to the row. They need only follow the README rule (real `<button>`s with an `aria-label`) and the row click keeps working.
 - 011: independent. Once the modals are `<dialog>`s, the close button label stays.
 - 008: pause and delete move into the row's kebab menu (`RowMenu`). If 008 lands first, the labels and `aria-label`s here go on the kebab button (`Actions for <name>`) and its items, and the row keeps only the buttons that stay on it (HP cell, roll). The row-click rule (`closest('button, a, input')`) also ignores clicks inside the open menu.
-<<<<<<< Updated upstream
-- 019: the name button and the row open the edit modal in Combat as well.
-=======
 - 019 and 022: the name button opens the edit modal in Combat as well, but in Combat a click on the row selects it for the quick HP panel instead of opening the modal. The row-click-to-edit rule here applies to Setup.
->>>>>>> Stashed changes
 
 ## Tests
 - `PlayerRow.test.tsx`: the name is a button that calls `onEdit`; clicking the row calls `onEdit`; clicking pause or delete does not; without `onEdit` nothing happens; each icon button is found by its accessible name (`getByRole('button', { name: ... })`, which also lets existing tests stop relying on button positions).
