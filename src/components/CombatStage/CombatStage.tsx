@@ -1,7 +1,7 @@
 import styles from './styles.module.scss';
-import clsx from 'clsx';
 import React from 'react';
 import { toast } from 'react-toastify';
+import { Button } from '@/components/Button/Button';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
 import { HpModal } from '@/components/HpModal/HpModal';
 import { Modal } from '@/components/Modal/Modal';
@@ -83,22 +83,21 @@ export function CombatStage({ details, updateGameDetails }: ICombatStageProps): 
   return (
     <>
       <div className={styles.actions}>
-        <button
-          className="btn"
+        <Button
           aria-disabled={nextTurnBlockReason !== null}
           title={nextTurnBlockReason ?? undefined}
           onClick={onNextPlayer}
         >
           Next Player
-        </button>
-        <button
-          className={clsx('btn', styles.change_status)}
+        </Button>
+        <Button
+          className={styles.change_status}
           onClick={() => {
             setModalsStatus(ModalsStatus.ConfirmFinishCombat);
           }}
         >
           Finish Combat
-        </button>
+        </Button>
       </div>
       <PlayersTable
         details={details}

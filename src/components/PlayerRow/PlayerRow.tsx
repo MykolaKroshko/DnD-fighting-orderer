@@ -4,6 +4,7 @@ import React from 'react';
 import DeleteIcon from '@/assets/icons/delete.svg?react';
 import FightIcon from '@/assets/icons/fight.svg?react';
 import PauseIcon from '@/assets/icons/pause.svg?react';
+import { Button } from '@/components/Button/Button';
 import { getMaxHp } from '@/hp';
 import { type IPlayer, PlayerStatus, PlayerType } from '@/types';
 import { getPlayerName } from '@/utils';
@@ -46,41 +47,38 @@ export function PlayerRow({
         {getPlayerName(player.name)}
       </td>
       <td>
-        <button
-          type="button"
-          className={clsx('btn', styles.hp_btn)}
+        <Button
+          className={styles.hp_btn}
           onClick={(e) => {
             onOpenHp?.(player);
             e.stopPropagation();
           }}
         >
           {`${player.hp}/${getMaxHp(player)}`}
-        </button>
+        </Button>
       </td>
       <td>{player.initiative ?? '--'}</td>
       <td>{player.dex ?? '--'}</td>
       <td>{isCombatStage === true && player.status === PlayerStatus.Active ? (player.order ?? '--') : '--'}</td>
       <td>
         <div className={styles.table_actions}>
-          <button
-            className="btn"
+          <Button
             onClick={(e) => {
               onTogglePause(player);
               e.stopPropagation();
             }}
           >
             {player.status === PlayerStatus.Paused ? <FightIcon className="icon" /> : <PauseIcon className="icon" />}
-          </button>
+          </Button>
           {onDelete === undefined ? null : (
-            <button
-              className="btn"
+            <Button
               onClick={(e) => {
                 onDelete?.(player);
                 e.stopPropagation();
               }}
             >
               <DeleteIcon className="icon" />
-            </button>
+            </Button>
           )}
         </div>
       </td>

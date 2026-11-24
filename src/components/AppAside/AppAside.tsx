@@ -7,6 +7,7 @@ import SidebarIcon from '@/assets/icons/sidebar.svg?react';
 import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
 import { AddGameModal } from '@/components/AddGameModal/AddGameModal';
 import { LayoutContext } from '@/components/AppLayout/AppLayout';
+import { Button } from '@/components/Button/Button';
 import { Modal } from '@/components/Modal/Modal';
 import { GlobalContext, useCurrentGame } from '@/globalContext';
 import { gamePath } from '@/paths';
@@ -64,9 +65,9 @@ export function AppAside(): React.ReactElement {
     <>
       <aside className={clsx(styles.sidebar, { [styles.open]: sidebarOpen })}>
         <div>
-          <button type="button" className={clsx('btn', styles.sidebar_toggle_btn)} onClick={onToggleSidebar}>
+          <Button className={styles.sidebar_toggle_btn} onClick={onToggleSidebar}>
             {icon}
-          </button>
+          </Button>
         </div>
         <nav>
           <ul className={styles.list}>
@@ -116,14 +117,14 @@ function ListItem({ game, currentGameId, onGameDelete }: IListItemProps): React.
       <Link className={clsx(styles.list_link, { [styles.active]: game.id === currentGameId })} to={gamePath(game.id)}>
         {getGameTitle(game.title)}
       </Link>
-      <button
-        className={clsx('btn', styles.delete_btn)}
+      <Button
+        className={styles.delete_btn}
         onClick={() => {
           onGameDelete(game);
         }}
       >
         <DeleteIcon className="icon" />
-      </button>
+      </Button>
     </li>
   );
 }

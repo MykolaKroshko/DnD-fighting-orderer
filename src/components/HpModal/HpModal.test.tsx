@@ -75,7 +75,7 @@ describe('HpModal', () => {
 
   it('Restore sets HP to the maximum without an amount', async () => {
     const { user, modal, lastHp, onClose } = setup();
-    await user.click(modal().getByRole('button', { name: 'Restore' }));
+    await user.click(modal().getByRole('button', { name: 'Restore to Max' }));
     expect(lastHp()).toBe(20);
     expect(onClose).toHaveBeenCalled();
   });

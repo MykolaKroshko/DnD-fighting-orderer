@@ -1,8 +1,8 @@
 import styles from './styles.module.scss';
-import clsx from 'clsx';
 import React from 'react';
 import { toast } from 'react-toastify';
 import { AddPlayerModal } from '@/components/AddPlayerModal/AddPlayerModal';
+import { Button } from '@/components/Button/Button';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
 import { HpModal } from '@/components/HpModal/HpModal';
 import { Modal } from '@/components/Modal/Modal';
@@ -93,38 +93,35 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
   return (
     <>
       <div className={styles.actions}>
-        <button
-          className="btn"
+        <Button
           onClick={() => {
             setModalsStatus(ModalsStatus.AddPlayer);
           }}
         >
           Add Player
-        </button>
-        <button
-          className="btn"
+        </Button>
+        <Button
           onClick={() => {
             setModalsStatus(ModalsStatus.AddAlly);
           }}
         >
           Add Ally
-        </button>
-        <button
-          className="btn"
+        </Button>
+        <Button
           onClick={() => {
             setModalsStatus(ModalsStatus.AddEnemy);
           }}
         >
           Add Enemy
-        </button>
-        <button
-          className={clsx('btn', styles.change_status)}
+        </Button>
+        <Button
+          className={styles.change_status}
           aria-disabled={startCombatBlockReason !== null}
           title={startCombatBlockReason ?? undefined}
           onClick={onChangeGameMode}
         >
           Start Combat
-        </button>
+        </Button>
       </div>
       <PlayersTable
         details={details}

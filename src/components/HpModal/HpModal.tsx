@@ -1,6 +1,7 @@
 import styles from './styles.module.scss';
 import React from 'react';
 import { toast } from 'react-toastify';
+import { Button } from '@/components/Button/Button';
 import { Input } from '@/components/Input/Input';
 import { Modal } from '@/components/Modal/Modal';
 import { damagePlayer, findPlayer, getMaxHp, healPlayer, restorePlayer } from '@/hp';
@@ -61,9 +62,7 @@ function HpForm({ playerId, details, onUpdate, onClose }: IHpModalProps): React.
     <Modal
       isOpen={player !== undefined}
       title={player === undefined ? undefined : `${getPlayerName(player.name)}: ${player.hp}/${getMaxHp(player)} HP`}
-      confirmLabel="Damage"
       onCloseModal={onClose}
-      onConfirmModal={onDamage}
     >
       <form
         onSubmit={(e) => {
@@ -88,15 +87,9 @@ function HpForm({ playerId, details, onUpdate, onClose }: IHpModalProps): React.
           }}
         />
         <div className={styles.actions}>
-          <button type="button" className="btn" onClick={onHeal}>
-            Heal
-          </button>
-          <button type="button" className="btn" onClick={onDamage}>
-            Damage
-          </button>
-          <button type="button" className="btn" onClick={onRestore}>
-            Restore
-          </button>
+          <Button onClick={onHeal}>Heal</Button>
+          <Button onClick={onDamage}>Damage</Button>
+          <Button onClick={onRestore}>Restore to Max</Button>
         </div>
       </form>
     </Modal>

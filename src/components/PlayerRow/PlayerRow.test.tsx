@@ -90,6 +90,15 @@ describe('PlayerRow', () => {
     expect(screen.getAllByRole('button')).toHaveLength(2);
   });
 
+  it('renders the HP, pause and delete buttons as type="button"', () => {
+    setup(makePlayer(), { onDelete: vi.fn() });
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(3);
+    buttons.forEach((button) => {
+      expect(button).toHaveAttribute('type', 'button');
+    });
+  });
+
   it('calls onTogglePause, and not onEdit, when the pause button is clicked', async () => {
     const player = makePlayer();
     const onEdit = vi.fn();
