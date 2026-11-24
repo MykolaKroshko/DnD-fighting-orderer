@@ -94,6 +94,7 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
     <>
       <div className={styles.actions}>
         <Button
+          variant="green"
           onClick={() => {
             setModalsStatus(ModalsStatus.AddPlayer);
           }}
@@ -101,6 +102,7 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
           Add Player
         </Button>
         <Button
+          variant="yellow"
           onClick={() => {
             setModalsStatus(ModalsStatus.AddAlly);
           }}
@@ -108,6 +110,7 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
           Add Ally
         </Button>
         <Button
+          variant="red"
           onClick={() => {
             setModalsStatus(ModalsStatus.AddEnemy);
           }}
@@ -115,6 +118,7 @@ export function SetupStage({ details, updateGameDetails }: ISetupStageProps): Re
           Add Enemy
         </Button>
         <Button
+          variant="blue"
           className={styles.change_status}
           aria-disabled={startCombatBlockReason !== null}
           title={startCombatBlockReason ?? undefined}

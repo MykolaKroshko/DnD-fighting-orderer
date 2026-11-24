@@ -84,6 +84,7 @@ export function CombatStage({ details, updateGameDetails }: ICombatStageProps): 
     <>
       <div className={styles.actions}>
         <Button
+          variant="red"
           aria-disabled={nextTurnBlockReason !== null}
           title={nextTurnBlockReason ?? undefined}
           onClick={onNextPlayer}
@@ -91,6 +92,7 @@ export function CombatStage({ details, updateGameDetails }: ICombatStageProps): 
           Next Player
         </Button>
         <Button
+          variant="blue"
           className={styles.change_status}
           onClick={() => {
             setModalsStatus(ModalsStatus.ConfirmFinishCombat);

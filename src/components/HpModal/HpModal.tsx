@@ -87,9 +87,15 @@ function HpForm({ playerId, details, onUpdate, onClose }: IHpModalProps): React.
           }}
         />
         <div className={styles.actions}>
-          <Button onClick={onHeal}>Heal</Button>
-          <Button onClick={onDamage}>Damage</Button>
-          <Button onClick={onRestore}>Restore to Max</Button>
+          <Button variant="green" onClick={onHeal}>
+            Heal
+          </Button>
+          <Button variant="red" onClick={onDamage}>
+            Damage
+          </Button>
+          <Button variant="blue" onClick={onRestore}>
+            Restore to Max
+          </Button>
         </div>
       </form>
     </Modal>

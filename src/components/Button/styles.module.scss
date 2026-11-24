@@ -6,14 +6,31 @@
   border-radius: 0.5rem;
   background-color: transparent;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+  opacity: 0.8;
+  transition: opacity 0.2s ease-in-out;
 
   &:hover {
-    background-color: #ececec;
+    opacity: 1;
   }
 
   &[aria-disabled='true'] {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: 0.3;
   }
+}
+
+.green {
+  background-color: #d0f0c0;
+}
+
+.red {
+  background-color: #fbceb1;
+}
+
+.yellow {
+  background-color: #f0e68c;
+}
+
+.blue {
+  background-color: #6cb4ee;
 }
