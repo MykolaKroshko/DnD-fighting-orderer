@@ -6,15 +6,30 @@
     <link rel="icon" href="/DnD-fighting-orderer/assets/dnd-B3GQucvu.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>D&D Fighting Order</title>
-    <script type="module" crossorigin src="/DnD-fighting-orderer/assets/index-BWZguO2U.js"></script>
-    <link rel="stylesheet" crossorigin href="/DnD-fighting-orderer/assets/index-BnViYJ_h.css">
-    <script type="module">import.meta.url;import("_").catch(()=>1);(async function*(){})().next();if(location.protocol!="file:"){window.__vite_is_modern_browser=true}</script>
+    <script>
+      // Restores the path that public/404.html moved into the query string (GitHub Pages SPA fallback).
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&');
+            })
+            .join('?');
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
+    <script type="module" crossorigin src="/DnD-fighting-orderer/assets/index-tSQsQrPp.js"></script>
+    <link rel="stylesheet" crossorigin href="/DnD-fighting-orderer/assets/index-D4m4b5Rr.css">
+    <script type="module">import'data:text/javascript,if(!import.meta.resolve)throw Error("import.meta.resolve not supported")';import.meta.url;import("_").catch(()=>1);(async function*(){})().next();window.__vite_is_modern_browser=true</script>
     <script type="module">!function(){if(window.__vite_is_modern_browser)return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}();</script>
   </head>
   <body>
     <div id="root"></div>
     <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
-    <script nomodule crossorigin id="vite-legacy-polyfill" src="/DnD-fighting-orderer/assets/polyfills-legacy-CMDb7L7j.js"></script>
-    <script nomodule crossorigin id="vite-legacy-entry" data-src="/DnD-fighting-orderer/assets/index-legacy-DYy9KMm1.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
+    <script nomodule crossorigin id="vite-legacy-polyfill" src="/DnD-fighting-orderer/assets/polyfills-legacy-ovchW3Ix.js"></script>
+    <script nomodule crossorigin id="vite-legacy-entry" data-src="/DnD-fighting-orderer/assets/index-legacy-BWChasKX.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
   </body>
 </html>
