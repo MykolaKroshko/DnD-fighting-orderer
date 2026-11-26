@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "dontAsk",
+    "denyInsteadOfPrompting": true,
+    "blockReadsOutsideWorkingDirectories": true,
+    "blockWritesOutsideWorkingDirectories": true,
+    "allow": [
+      "Bash(yarn typecheck)",
+      "Bash(yarn test *)",
+      "Bash(npx eslint *)",
+      "Bash(yarn build)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./.claude/settings.local.json)",
+      "Bash(git push *)",
+      "Bash(yarn add *)",
+      "Bash(npm install *)",
+      "Bash(yarn lint)",
+      "Bash(yarn lint *)",
+      "WebFetch",
+      "WebSearch",
+      "mcp__*"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": ["~/.ssh", "~/.aws"]
+    },
+    "network": {
+      "allowedDomains": []
+    }
+  },
+  "env": {
+    "CLAUDE_CODE_MAX_TURNS": "8",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "4000",
+    "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"
+  }
+}
