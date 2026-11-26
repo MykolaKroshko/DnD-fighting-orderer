@@ -9,6 +9,7 @@
     }],
     "color-no-invalid-hex": true,
     "no-descending-specificity": null,
+    "declaration-property-value-no-unknown": null,
     "plugin/rational-order": [true, {
       "border-in-box-model": true,
       "empty-line-between-groups": false

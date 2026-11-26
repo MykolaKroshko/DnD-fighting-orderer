@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Bash(ls *)",
+      "Bash(npx eslint *)",
+      "Bash(npx tsc *)",
+      "Bash(yarn lint)",
+      "Bash(yarn lint *)",
+      "Bash(yarn test)",
+      "Bash(yarn test *)",
+      "Bash(npx vitest *)",
+      "Bash(yarn typecheck *)",
+      "Bash(yarn -s typecheck *)",
+      "mcp__filesystem__read_text_file",
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__list_directory_with_sizes",
+      "mcp__filesystem__list_allowed_directories"
+    ],
+    "ask": [
+      "Bash(cd ~/*)",
+      "Bash(git *)",
+      "Bash(nano *)",
+      "Bash(node *)",
+      "Bash(yarn add *)",
+      "Bash(rm *)"
+    ],
+    "deny": [
+      "Bash(curl:*)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git push)",
+      "Bash(py *)",
+      "Bash(python *)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~/)",
+      "Bash(rm /)",
+      "Bash(rm ~/)",
+      "Bash(sed *)",
+      "Bash(vim *)",
+      "PowerShell(*)",
+      "Read(*.env)",
+      "Read(*.env.*)",
+      "mcp__filesystem__write_file",
+      "mcp__filesystem__edit_file",
+      "mcp__filesystem__move_file"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": false,
+    "autoAllowBashIfSandboxed": false,
+    "filesystem": {
+      "denyRead": [
+        "~/.ssh",
+        "~/.aws"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "registry.npmjs.org"
+      ]
+    }
+  },
+  "model": "claude-sonnet-5-5",
+  "effortLevel": "medium",
+  "fastMode": false,
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "180000",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-haiku-5-5"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "timeout": 10,
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/protect-files.mjs"
+            ],
+            "type": "command",
+            "command": "node"
+          }
+        ],
+        "matcher": "Edit|Write"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "timeout": 30,
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/log-after-edit.mjs"
+            ],
+            "type": "command",
+            "command": "node"
+          }
+        ],
+        "matcher": "Edit|Write"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "timeout": 300,
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/format-lint-test-before-stop.mjs"
+            ],
+            "type": "command",
+            "command": "node"
+          }
+        ]
+      }
+    ]
+  }
+}

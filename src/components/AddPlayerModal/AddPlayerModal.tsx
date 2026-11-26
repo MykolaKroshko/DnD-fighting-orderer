@@ -1,73 +1,91 @@
-import React, { type FormEvent, useEffect, useMemo, useRef } from 'react';
+import React, { type FormEvent, useEffect, useRef } from 'react';
 import { Input } from '@/components/Input/Input';
 import { Modal } from '@/components/Modal/Modal';
-import { ModalsStatus } from '@/components/SetupStage/SetupStage';
 import { type IPlayer, PlayerStatus, PlayerType } from '@/types';
+import { parseNumberInput } from '@/utils';
 
 interface IAddPlayerModalProps {
-  status: ModalsStatus;
+  playerType: PlayerType | null;
   onCloseModal: () => void;
-  onConfirmModal: (data: IPlayer) => void;
+  onConfirmModal: (data: Omit<IPlayer, 'id'>) => void;
 }
 
-export function AddPlayerModal({
-  status,
+const MODAL_CONFIG: Record<PlayerType, { title: string; defaultName: string }> = {
+  [PlayerType.Player]: { title: 'Add Player', defaultName: 'New Player' },
+  [PlayerType.Ally]: { title: 'Add Ally', defaultName: 'New Ally' },
+  [PlayerType.Enemy]: { title: 'Add Enemy', defaultName: 'New Enemy' },
+};
+
+/** Remounted for every opening (see `key`), so the form starts with the default name already selected. */
+export function AddPlayerModal(props: IAddPlayerModalProps): React.ReactElement {
+  return <AddPlayerForm key={props.playerType ?? 'closed'} {...props} />;
+}
+
+function AddPlayerForm({
+  playerType,
   onCloseModal,
   onConfirmModal: onConfirmModalAction,
 }: IAddPlayerModalProps): React.ReactElement {
-  const title =
-    status === ModalsStatus.AddPlayer ? 'Add Player' : status === ModalsStatus.AddAlly ? 'Add Ally' : 'Add Enemy';
-  const [name, setName] = React.useState<string>('');
-  const [dex, setDex] = React.useState<number>('' as any);
-  const [initiative, setInitiative] = React.useState<number>('' as any);
+  const config = playerType === null ? undefined : MODAL_CONFIG[playerType];
+  const isOpen = playerType !== null;
+  const [name, setName] = React.useState<string>(config?.defaultName ?? '');
+  const [maxHp, setMaxHp] = React.useState<string>('1');
+  const [hp, setHp] = React.useState<string>('');
+  const [hpTouched, setHpTouched] = React.useState<boolean>(false);
+  const [dex, setDex] = React.useState<string>('');
+  const [initiative, setInitiative] = React.useState<string>('');
   const nameRef = useRef<HTMLInputElement>(null);
 
-  const newName = useMemo(() => {
-    const newName =
-      status === ModalsStatus.AddPlayer ? 'New Player' : status === ModalsStatus.AddAlly ? 'New Ally' : 'New Enemy';
-    setName(newName);
-    return newName;
-  }, [status]);
+  const resetForm = (): void => {
+    setName(config?.defaultName ?? '');
+    setMaxHp('1');
+    setHp('');
+    setHpTouched(false);
+    setDex('');
+    setInitiative('');
+  };
 
   useEffect(() => {
-    if (
-      nameRef.current !== null &&
-      [ModalsStatus.AddPlayer, ModalsStatus.AddAlly, ModalsStatus.AddEnemy].includes(status)
-    ) {
+    if (isOpen) {
       nameRef.current?.focus();
       nameRef.current?.select();
     }
-  }, [nameRef, status]);
+  }, [isOpen]);
 
   const onConfirmModal = (): void => {
+    if (playerType === null) {
+      return;
+    }
+
+    const parsedMaxHp = Math.max(1, parseNumberInput(maxHp, { integer: true }) ?? 1);
+    const parsedHp = hpTouched ? (parseNumberInput(hp, { integer: true }) ?? parsedMaxHp) : parsedMaxHp;
+
     onConfirmModalAction({
-      id: Math.round(Math.random() * 1_000_000_000),
       name,
-      dex: dex ?? null,
-      initiative: initiative ?? null,
-      type:
-        status === ModalsStatus.AddPlayer
-          ? PlayerType.Player
-          : status === ModalsStatus.AddAlly
-            ? PlayerType.Ally
-            : PlayerType.Enemy,
+      maxHp: parsedMaxHp,
+      hp: Math.min(Math.max(parsedHp, 0), parsedMaxHp),
+      dex: parseNumberInput(dex, { integer: true }),
+      initiative: parseNumberInput(initiative, { integer: false }),
+      type: playerType,
       status: PlayerStatus.Active,
       order: undefined,
     });
-    setName(newName);
-    setDex('' as any);
-    setInitiative('' as any);
+    resetForm();
+  };
+
+  const onEnter = (e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      onConfirmModal();
+    }
   };
 
   return (
     <Modal
-      isOpen={[ModalsStatus.AddPlayer, ModalsStatus.AddAlly, ModalsStatus.AddEnemy].includes(status)}
-      title={title}
+      isOpen={isOpen}
+      title={config?.title}
       onCloseModal={() => {
         onCloseModal();
-        setName(newName);
-        setDex('' as any);
-        setInitiative('' as any);
+        resetForm();
       }}
       onConfirmModal={onConfirmModal}
     >
@@ -84,41 +102,58 @@ export function AddPlayerModal({
           onInput={(e: FormEvent<HTMLInputElement>) => {
             setName(e.currentTarget.value);
           }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              onConfirmModal();
-            }
+          onKeyPress={onEnter}
+        />
+        <Input
+          name="maxHp"
+          label="Max HP"
+          type="number"
+          step="1"
+          min="1"
+          inputMode="numeric"
+          value={maxHp}
+          onInput={(e: FormEvent<HTMLInputElement>) => {
+            setMaxHp(e.currentTarget.value);
           }}
+          onKeyPress={onEnter}
+        />
+        <Input
+          name="hp"
+          label="Current HP"
+          type="number"
+          step="1"
+          min="0"
+          inputMode="numeric"
+          value={hpTouched ? hp : maxHp}
+          onInput={(e: FormEvent<HTMLInputElement>) => {
+            setHpTouched(true);
+            setHp(e.currentTarget.value);
+          }}
+          onKeyPress={onEnter}
         />
         <Input
           name="initiative"
           label="Initiative"
           type="number"
-          inputMode="numeric"
+          step="any"
+          inputMode="decimal"
           value={initiative}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            setInitiative(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
+            setInitiative(e.currentTarget.value);
           }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              onConfirmModal();
-            }
-          }}
+          onKeyPress={onEnter}
         />
         <Input
           name="dex"
           label="Dexterity"
           type="number"
+          step="1"
           inputMode="numeric"
           value={dex}
           onInput={(e: FormEvent<HTMLInputElement>) => {
-            setDex(!isNaN(Number(e.currentTarget.value)) ? parseInt(e.currentTarget.value) : ('' as any));
+            setDex(e.currentTarget.value);
           }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              onConfirmModal();
-            }
-          }}
+          onKeyPress={onEnter}
         />
       </form>
     </Modal>

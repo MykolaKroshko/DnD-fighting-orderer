@@ -1,6 +1,7 @@
 import styles from './styles.module.scss';
 import React, { createContext, useCallback, useEffect, useMemo } from 'react';
 import { Outlet } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import { AppAside } from '@/components/AppAside/AppAside';
 import { AppHeader } from '@/components/AppHeader/AppHeader';
 
@@ -33,8 +34,8 @@ export function AppLayout(): React.ReactNode {
     const mediaWatcher = window.matchMedia('(min-width: 768px)');
     setIsMobile(!mediaWatcher.matches);
 
-    function updateIsNarrowScreen(e: any): void {
-      setIsMobile(!(e.matches as boolean));
+    function updateIsNarrowScreen(e: MediaQueryListEvent): void {
+      setIsMobile(!e.matches);
     }
     mediaWatcher.addEventListener('change', updateIsNarrowScreen);
 
@@ -87,6 +88,7 @@ export function AppLayout(): React.ReactNode {
           </main>
         </div>
       </div>
+      <ToastContainer position="bottom-right" autoClose={4000} />
     </LayoutContext.Provider>
   );
 }

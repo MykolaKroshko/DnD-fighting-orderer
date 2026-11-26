@@ -1,28 +1,18 @@
 import styles from './styles.module.scss';
 import clsx from 'clsx';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { GlobalContext } from '@/App';
+import React, { useContext, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import DeleteIcon from '@/assets/icons/delete.svg?react';
 import SidebarIcon from '@/assets/icons/sidebar.svg?react';
 import SidebarWideIcon from '@/assets/icons/sidebar_wide.svg?react';
-import { LayoutContext } from '@/components/AppLayout/AppLayout';
-import { Pages } from '@/routes';
-import { type IGame } from '@/types';
-import DeleteIcon from '@/assets/icons/delete.svg?react';
-import { Modal } from '@/components/Modal/Modal';
 import { AddGameModal } from '@/components/AddGameModal/AddGameModal';
-import { LS_GAME_DETAIL_KEY } from '@/components/MainPage/MainPage';
-
-const LS_LIST_KEY = 'dnd_fo_games_list';
-
-const getGamesList = (): IGame[] => {
-  const gamesList = localStorage.getItem(LS_LIST_KEY);
-  return gamesList !== null ? JSON.parse(gamesList) : [];
-};
-
-const setGamesList = (games: IGame[]): void => {
-  localStorage.setItem(LS_LIST_KEY, JSON.stringify(games));
-};
+import { LayoutContext } from '@/components/AppLayout/AppLayout';
+import { Button } from '@/components/Button/Button';
+import { Modal } from '@/components/Modal/Modal';
+import { GlobalContext, useCurrentGame } from '@/globalContext';
+import { gamePath } from '@/paths';
+import { type IGame } from '@/types';
+import { getGameTitle } from '@/utils';
 
 enum ModalStatus {
   None,
@@ -31,23 +21,13 @@ enum ModalStatus {
 }
 
 export function AppAside(): React.ReactElement {
-  const { setCurrentGame, currentGame } = useContext(GlobalContext);
+  const { games, addGame, removeGame } = useContext(GlobalContext);
+  const currentGame = useCurrentGame();
+  const navigate = useNavigate();
   const { sidebarOpen, onToggleSidebar, isMobile } = useContext(LayoutContext);
-  const [games, setGames] = useState<IGame[]>(getGamesList());
   const [selectedGame, setSelectedGame] = useState<IGame | null>(null);
   const [modalStatus, setModalStatus] = useState<ModalStatus>(ModalStatus.None);
   const [formInput, setFormInput] = useState<string>('');
-  const { id } = useParams();
-
-  useEffect(() => {
-    if (id !== undefined && games.length > 0) {
-      const game = games.find((game) => game.id === Number(id));
-      if (game !== undefined) {
-        setCurrentGame(game);
-      }
-    }
-    // ignore dependency warning
-  }, []);
 
   const icon = useMemo(
     () => (isMobile ? <SidebarIcon className="icon" /> : <SidebarWideIcon className="icon" />),
@@ -61,12 +41,9 @@ export function AppAside(): React.ReactElement {
   };
 
   const onConfirmModal = (): void => {
-    const newGame: IGame = { id: Math.round(Math.random() * 1_000_000_000), title: formInput };
-    const newGames = [...games, newGame].toSorted((a, b) => a.title.localeCompare(b.title));
-    setCurrentGame(newGame);
-    setGames(newGames);
-    setGamesList(newGames);
+    const newGame = addGame(formInput);
     onCloseModal();
+    void navigate(gamePath(newGame.id));
   };
 
   const onGameDeleteRequest = (game: IGame): void => {
@@ -76,13 +53,10 @@ export function AppAside(): React.ReactElement {
 
   const onGameDelete = (): void => {
     if (selectedGame !== null) {
-      const newGames = games.filter((g) => g.id !== selectedGame.id);
-      setGames(newGames);
-      setGamesList(newGames);
+      removeGame(selectedGame.id);
       if (currentGame?.id === selectedGame.id) {
-        setCurrentGame(null);
+        void navigate(gamePath());
       }
-      localStorage.removeItem(LS_GAME_DETAIL_KEY + '__' + selectedGame.id);
     }
     onCloseModal();
   };
@@ -91,20 +65,14 @@ export function AppAside(): React.ReactElement {
     <>
       <aside className={clsx(styles.sidebar, { [styles.open]: sidebarOpen })}>
         <div>
-          <button type="button" className={clsx('btn', styles.sidebar_toggle_btn)} onClick={onToggleSidebar}>
+          <Button className={styles.sidebar_toggle_btn} onClick={onToggleSidebar}>
             {icon}
-          </button>
+          </Button>
         </div>
         <nav>
           <ul className={styles.list}>
             {games.map((game) => (
-              <ListItem
-                game={game}
-                currentGameId={currentGame?.id}
-                setCurrentGame={setCurrentGame}
-                key={game.id}
-                onGameDelete={onGameDeleteRequest}
-              />
+              <ListItem game={game} currentGameId={currentGame?.id} key={game.id} onGameDelete={onGameDeleteRequest} />
             ))}
           </ul>
         </nav>
@@ -131,7 +99,7 @@ export function AppAside(): React.ReactElement {
         onCloseModal={onCloseModal}
         onConfirmModal={onGameDelete}
       >
-        <p>Are you sure you want to delete {selectedGame?.title}?</p>
+        <p>Are you sure you want to delete {getGameTitle(selectedGame?.title ?? '')}?</p>
       </Modal>
     </>
   );
@@ -139,31 +107,24 @@ export function AppAside(): React.ReactElement {
 
 interface IListItemProps {
   game: IGame;
-  currentGameId: number | undefined;
-  setCurrentGame: (game: IGame) => void;
+  currentGameId: string | undefined;
   onGameDelete: (game: IGame) => void;
 }
 
-function ListItem({ game, currentGameId, setCurrentGame, onGameDelete }: IListItemProps): React.ReactElement {
+function ListItem({ game, currentGameId, onGameDelete }: IListItemProps): React.ReactElement {
   return (
     <li className={styles.list_item}>
-      <Link
-        className={clsx(styles.list_link, { [styles.active]: game.id === currentGameId })}
-        to={Pages.Root.replace(':id?', game.id.toString())}
-        onClick={() => {
-          setCurrentGame(game);
-        }}
-      >
-        {game.title}
+      <Link className={clsx(styles.list_link, { [styles.active]: game.id === currentGameId })} to={gamePath(game.id)}>
+        {getGameTitle(game.title)}
       </Link>
-      <button
-        className={clsx('btn', styles.delete_btn)}
+      <Button
+        className={styles.delete_btn}
         onClick={() => {
           onGameDelete(game);
         }}
       >
         <DeleteIcon className="icon" />
-      </button>
+      </Button>
     </li>
   );
 }

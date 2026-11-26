@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "test-claude-plugin",
+  "description": "Marketplace for the DnD Flow Toolkit Claude Code plugin.",
+  "owner": {
+    "name": "Mykola Kroshko"
+  },
+  "plugins": [
+    {
+      "name": "dnd-flow-toolkit",
+      "source": ".",
+      "description": "Feature planning and change-plan review with mobile-first guidance and file quality guards."
+    }
+  ]
+}

@@ -1,10 +1,19 @@
-import clsx from 'clsx';
+import styles from './styles.module.scss';
 import React from 'react';
+import { toast } from 'react-toastify';
+import { Button } from '@/components/Button/Button';
 import { EditPlayerModal } from '@/components/EditPlayerModal/EditPlayerModal';
+import { HpModal } from '@/components/HpModal/HpModal';
+import { Modal } from '@/components/Modal/Modal';
 import { PlayersTable } from '@/components/PlayersTable/PlayersTable';
-import styles from '@/components/SetupStage/styles.module.scss';
 import { GameStatus, type IGameDetails, type IPlayer, PlayerStatus } from '@/types';
-import { getDetailsKeyByPlayerType, updatePlayersOrder } from '@/utils';
+import {
+  advanceTurn,
+  getDetailsKeyByPlayerType,
+  getNextTurnBlockReason,
+  toggleParticipantPause,
+  updatePlayersOrder,
+} from '@/utils';
 
 interface ICombatStageProps {
   details: IGameDetails;
@@ -14,11 +23,14 @@ interface ICombatStageProps {
 enum ModalsStatus {
   None,
   ChangeInitiative,
+  ConfirmFinishCombat,
 }
 
 export function CombatStage({ details, updateGameDetails }: ICombatStageProps): React.ReactElement {
   const [modalsStatus, setModalsStatus] = React.useState<ModalsStatus>(ModalsStatus.None);
   const [currentPlayer, setCurrentPlayer] = React.useState<IPlayer | null>(null);
+  const [hpPlayerId, setHpPlayerId] = React.useState<string | null>(null);
+  const nextTurnBlockReason = getNextTurnBlockReason(details);
 
   function onCloseModal(): void {
     setModalsStatus(ModalsStatus.None);
@@ -26,17 +38,12 @@ export function CombatStage({ details, updateGameDetails }: ICombatStageProps): 
   }
 
   const onNextPlayer = (): void => {
-    const activePlayers = [...details.players, ...details.allies, ...details.enemies]
-      .filter((p) => p.status !== PlayerStatus.Paused)
-      .toSorted((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const currentPlayerIndex = activePlayers.findIndex((p) => p.id === details.currentPlayerId);
-    const nextPlayerIndex = currentPlayerIndex === -1 ? 0 : (currentPlayerIndex + 1) % activePlayers.length;
-    const nextPlayerId = activePlayers[nextPlayerIndex].id;
-    updateGameDetails({
-      ...details,
-      currentPlayerId: nextPlayerId,
-      round: details.round + (currentPlayerIndex === activePlayers.length - 1 ? 1 : 0),
-    });
+    if (nextTurnBlockReason !== null) {
+      toast.info(nextTurnBlockReason);
+      return;
+    }
+
+    updateGameDetails(advanceTurn(details));
   };
 
   const onFinishCombat = (): void => {
@@ -49,22 +56,12 @@ export function CombatStage({ details, updateGameDetails }: ICombatStageProps): 
       allies: details.allies.map((p) => ({ ...p, order: undefined, initiative: null })),
       round: 1,
     });
+    onCloseModal();
   };
 
   function onRequestToggleUserPaused(player: IPlayer): void {
     if (player.status === PlayerStatus.Active || typeof player.initiative === 'number') {
-      const typeKey = getDetailsKeyByPlayerType(player.type);
-
-      updateGameDetails(
-        updatePlayersOrder({
-          ...details,
-          [typeKey]: details[typeKey].map((p) =>
-            p.id === player.id
-              ? { ...p, status: p.status === PlayerStatus.Active ? PlayerStatus.Paused : PlayerStatus.Active }
-              : p
-          ),
-        })
-      );
+      updateGameDetails(toggleParticipantPause(details, player));
     } else {
       setCurrentPlayer(player);
       setModalsStatus(ModalsStatus.ChangeInitiative);
@@ -86,19 +83,48 @@ export function CombatStage({ details, updateGameDetails }: ICombatStageProps): 
   return (
     <>
       <div className={styles.actions}>
-        <button className={'btn'} onClick={onNextPlayer}>
+        <Button
+          variant="red"
+          aria-disabled={nextTurnBlockReason !== null}
+          title={nextTurnBlockReason ?? undefined}
+          onClick={onNextPlayer}
+        >
           Next Player
-        </button>
-        <button className={clsx('btn', styles.change_status)} onClick={onFinishCombat}>
+        </Button>
+        <Button
+          variant="blue"
+          className={styles.change_status}
+          onClick={() => {
+            setModalsStatus(ModalsStatus.ConfirmFinishCombat);
+          }}
+        >
           Finish Combat
-        </button>
+        </Button>
       </div>
       <PlayersTable
         details={details}
-        setCurrentPlayer={() => {}}
-        setModalsStatus={() => {}}
+        onOpenHp={(player) => {
+          setHpPlayerId(player.id);
+        }}
         onRequestToggleUserPaused={onRequestToggleUserPaused}
       />
+      <HpModal
+        playerId={hpPlayerId}
+        details={details}
+        onUpdate={updateGameDetails}
+        onClose={() => {
+          setHpPlayerId(null);
+        }}
+      />
+      <Modal
+        isOpen={modalsStatus === ModalsStatus.ConfirmFinishCombat}
+        title="Finish combat?"
+        confirmLabel="Finish"
+        onCloseModal={onCloseModal}
+        onConfirmModal={onFinishCombat}
+      >
+        <p>All enemies will be removed and the initiative of players and allies will be reset.</p>
+      </Modal>
       {currentPlayer !== null && (
         <EditPlayerModal
           isOpen={modalsStatus === ModalsStatus.ChangeInitiative}

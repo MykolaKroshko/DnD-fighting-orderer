@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "dontAsk",
+    "denyInsteadOfPrompting": true,
+    "blockReadsOutsideWorkingDirectories": true,
+    "blockWritesOutsideWorkingDirectories": true,
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./.claude/settings.local.json)",
+      "WebFetch",
+      "WebSearch",
+      "mcp__*",
+      "Bash(git push *)",
+      "Bash(yarn add *)",
+      "Bash(npm install *)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": ["~/.ssh", "~/.aws"]
+    },
+    "network": {
+      "allowedDomains": []
+    }
+  },
+  "env": {
+    "CLAUDE_CODE_MAX_TURNS": "4",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "2000",
+    "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"
+  }
+}
