@@ -17,13 +17,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '24.15.0'
 
       - name: Add yarn
-        uses: mskelton/setup-yarn@v1
+        run: npm install --global yarn@1.22.22
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --frozen-lockfile
 
       - name: Build project
         run: yarn build
